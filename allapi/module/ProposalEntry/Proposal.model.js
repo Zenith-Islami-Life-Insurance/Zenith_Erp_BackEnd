@@ -117,7 +117,7 @@ const proposal = {
 
       for (const proposal of proposals) {
         const {
-          TABLE_ID,TERM,
+          TABLE_ID, TERM,
         } = proposal;
 
         const result = await con.execute(
@@ -127,7 +127,7 @@ const proposal = {
           {
             TABLE_ID,
             TERM,
-           
+
           },
           { autoCommit: true }
         );
@@ -150,58 +150,58 @@ const proposal = {
     }
   },
 
-//// update 
-// async updateData(dataToUpdate, condition) {
-//   let connection;
-//   try {
-//     connection = await oracledb.getConnection();
-//     const query = `UPDATE YourTable SET column1 = :value1 WHERE condition = :condition`;
-//     const result = await connection.execute(query, { value1: dataToUpdate, condition: condition });
-//     return result.rowsAffected;
-//   } catch (error) {
-//     console.error('Error updating data:', error);
-//     throw error;
-//   } finally {
-//     if (connection) {
-//       try {
-//         await connection.close();
-//       } catch (error) {
-//         console.error('Error closing connection:', error);
-//       }
-//     }
-//   }
-// },
-updateBychno: async (PROPOSAL_N, updatedpurchase) => {
-  let con;
-  try {
-    con = await oracledb.getConnection({
-      user: "MENU",
-      password: "mayin",
-      connectString: "192.168.3.11/system",
-    });
+  //// update 
+  // async updateData(dataToUpdate, condition) {
+  //   let connection;
+  //   try {
+  //     connection = await oracledb.getConnection();
+  //     const query = `UPDATE YourTable SET column1 = :value1 WHERE condition = :condition`;
+  //     const result = await connection.execute(query, { value1: dataToUpdate, condition: condition });
+  //     return result.rowsAffected;
+  //   } catch (error) {
+  //     console.error('Error updating data:', error);
+  //     throw error;
+  //   } finally {
+  //     if (connection) {
+  //       try {
+  //         await connection.close();
+  //       } catch (error) {
+  //         console.error('Error closing connection:', error);
+  //       }
+  //     }
+  //   }
+  // },
+  updateBychno: async (PROPOSAL_N, updatedpurchase) => {
+    let con;
+    try {
+      con = await oracledb.getConnection({
+        user: "MENU",
+        password: "mayin",
+        connectString: "192.168.3.11/system",
+      });
 
-    const result = await con.execute(
-      `UPDATE POLICY_MANAGEMENT.PROPOSAL_DUMMY 
+      const result = await con.execute(
+        `UPDATE POLICY_MANAGEMENT.PROPOSAL_DUMMY 
        SET ADDRESS2 = :ADDRESS2, ADDRESS3 = :ADDRESS3, ZIP = :ZIP 
        WHERE PROPOSAL_N = :PROPOSAL_N`,
-      {
-        ADDRESS2: updatedpurchase.ADDRESS2,
-        ADDRESS3: updatedpurchase.ADDRESS3,
-        ZIP: updatedpurchase.ZIP,
-        PROPOSAL_N: PROPOSAL_N
-      },
-      { autoCommit: true }
-    );
+        {
+          ADDRESS2: updatedpurchase.ADDRESS2,
+          ADDRESS3: updatedpurchase.ADDRESS3,
+          ZIP: updatedpurchase.ZIP,
+          PROPOSAL_N: PROPOSAL_N
+        },
+        { autoCommit: true }
+      );
 
-    // Release the connection
-    await con.release();
-    
-    return result.rowsAffected || 0;
-  } catch (err) {
-    console.error("Error updating purchase:", err);
-    throw err; // Propagate the error to the caller
-  }
-},
+      // Release the connection
+      await con.release();
+
+      return result.rowsAffected || 0;
+    } catch (err) {
+      console.error("Error updating purchase:", err);
+      throw err; // Propagate the error to the caller
+    }
+  },
 
   //FIND PROPOSAL NUMBER
   getProposalnNumber: async (OFFICE_CODE, callback) => {

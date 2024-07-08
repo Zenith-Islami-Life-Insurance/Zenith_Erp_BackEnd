@@ -26,8 +26,8 @@ router
   .get("/post-office/:code", ProposalController.getPostofficeList)
   .post("/proposal-entry", ProposalController.InsertProposalDataController)
   .post("/proposal-entry2", ProposalController.InsertProposal2DataController)
-  .put("/proposal-update/:PROPOSAL_N", ProposalController.updatepurchaseByChno)
-  
+  .patch("/proposal-update/:PROPOSAL_N", ProposalController.updatepurchaseByChno)
+
   .get("/proposal-number", ProposalController.getProposalNumber)
   .get(
     "/comm_date/:com_date/:policy_type",

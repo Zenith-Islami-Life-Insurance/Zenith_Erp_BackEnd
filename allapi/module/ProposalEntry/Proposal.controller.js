@@ -26,23 +26,21 @@ exports.InsertProposal2DataController = async (req, res) => {
     res.status(500).json({ success: false, error: "Internal Server Error" });
   }
 };
-  
 
 // update proposal
 exports.updatepurchaseByChno = async (req, res) => {
-  console.log("Reached updatepurchaseByChno function");
-  
+
   const { PROPOSAL_N } = req.params;
-  console.log('Proposal number:', PROPOSAL_N);
-  
   const result = req.body;
-  console.log('Request body:', req.body);
   try {
-  
-   await ProposalModule.updateBychno(PROPOSAL_N, result);
-   
+
+    await ProposalModule.updateBychno(PROPOSAL_N, result);
     console.log("Purchase successfully updated for proposal number:", PROPOSAL_N);
-    res.status(204).end();
+    res.status(200).json({
+      success: true,
+      error: "Updated Successfully",
+      data: result
+    });
   } catch (error) {
     console.error("Error updating purchase:", error);
     res.status(500).json({ error: "Failed to update purchase", errorMessage: error.message });
@@ -661,11 +659,9 @@ exports.supplimentClassList = (req, res) => {
       class_id: sClas[0],
       class_name: sClas[1],
     }));
-
     res.json(supplimentList);
   });
 };
-
 //supplimentary list
 exports.supplimentList = (req, res) => {
   ProposalModule.getSuppllist((err, blist) => {
@@ -715,7 +711,6 @@ exports.getSupplimentValue = (req, res) => {
     }
   );
 };
-
 //get basic premium value
 exports.getBasicPremValue = (req, res) => {
   const table_id = req.params.table_id;
@@ -748,7 +743,6 @@ exports.getBasicPremValue = (req, res) => {
     }
   );
 };
-
 //get sum at risk
 exports.getSumatRisks = (req, res) => {
   const table_id = req.params.table_id;

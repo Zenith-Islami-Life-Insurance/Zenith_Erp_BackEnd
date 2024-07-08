@@ -12,7 +12,7 @@ connection.finally((err) => {
 });
 
 // server port Connection
-const port = process.env.PORT || 5000;
+const port = process.env.PORT || 5001;
 
 app.listen(port, () => {
   console.log(`App is running on port http://localhost:${port}`);
