@@ -18,6 +18,7 @@ const proposal = {
       for (const proposal of proposals) {
         const {
           PROPOSAL_N,
+          POL_ENTRY_STATUS,
           PROPOSAL_D,
           RISKDATE,
           PROPOSER,
@@ -39,6 +40,7 @@ const proposal = {
           BRANCH_ID,
           USERID,
           LAST_EDUCATION,
+          LAST_EDU_DOCUMENT,
           RELIGION,
           MARITAL_STATUS,
           LOCALITY_COUNTRY,
@@ -47,13 +49,24 @@ const proposal = {
         } = proposal;
 
         const result = await con.execute(
-          `INSERT INTO POLICY_MANAGEMENT.PROPOSAL_DUMMY(PROPOSAL_N, PROPOSAL_D, RISKDATE, PROPOSER, FATHERS_NAME, FATHERHUSB, MOTHERS_NAME,ADDRESS1,POST_CODE_CUR, POST_CODE_PER, CITY, MOBILE, LOCALITY,  N_ID_NUMBER,DOB, AGE, SEX, OCCUPATION, AGENT_ID, BRANCH_ID, USERID,LAST_EDUCATION, RELIGION, MARITAL_STATUS, LOCALITY_COUNTRY, SPOUSE, PD_CODE) 
-            
-            VALUES(:PROPOSAL_N, TO_DATE(:PROPOSAL_D,'YYYYMMDD'), TO_DATE(:RISKDATE,'YYYYMMDD'), :PROPOSER,:FATHERS_NAME,:FATHERHUSB,:MOTHERS_NAME,:ADDRESS1,:POST_CODE_CUR,:POST_CODE_PER,:CITY,
-            :MOBILE,:LOCALITY,:N_ID_NUMBER,TO_DATE(:DOB,'YYYYMMDD'),:AGE,:SEX,:OCCUPATION,:AGENT_ID,:BRANCH_ID,:USERID,:LAST_EDUCATION,:RELIGION,:MARITAL_STATUS,
-            :LOCALITY_COUNTRY,:SPOUSE,:PD_CODE)`,
+          `INSERT INTO POLICY_MANAGEMENT.PROPOSAL_DUMMY(
+            PROPOSAL_N, POL_ENTRY_STATUS, PROPOSAL_D, RISKDATE, PROPOSER, 
+            FATHERS_NAME, FATHERHUSB, MOTHERS_NAME, ADDRESS1, POST_CODE_CUR, 
+            POST_CODE_PER, CITY, MOBILE, LOCALITY, N_ID_NUMBER, DOB, AGE, SEX, 
+            OCCUPATION, AGENT_ID, BRANCH_ID, USERID, LAST_EDUCATION, 
+            LAST_EDU_DOCUMENT, RELIGION, MARITAL_STATUS, LOCALITY_COUNTRY, SPOUSE, PD_CODE
+          ) 
+          VALUES(
+            :PROPOSAL_N, :POL_ENTRY_STATUS, TO_DATE(:PROPOSAL_D,'YYYYMMDD'), 
+            TO_DATE(:RISKDATE,'YYYYMMDD'), :PROPOSER, :FATHERS_NAME, :FATHERHUSB, 
+            :MOTHERS_NAME, :ADDRESS1, :POST_CODE_CUR, :POST_CODE_PER, :CITY, 
+            :MOBILE, :LOCALITY, :N_ID_NUMBER, TO_DATE(:DOB,'YYYYMMDD'), :AGE, 
+            :SEX, :OCCUPATION, :AGENT_ID, :BRANCH_ID, :USERID, :LAST_EDUCATION, 
+            :LAST_EDU_DOCUMENT, :RELIGION, :MARITAL_STATUS, :LOCALITY_COUNTRY, :SPOUSE, :PD_CODE
+          )`,
           {
             PROPOSAL_N,
+            POL_ENTRY_STATUS,
             PROPOSAL_D,
             RISKDATE,
             PROPOSER,
@@ -75,6 +88,7 @@ const proposal = {
             BRANCH_ID,
             USERID,
             LAST_EDUCATION,
+            LAST_EDU_DOCUMENT,
             RELIGION,
             MARITAL_STATUS,
             LOCALITY_COUNTRY,
@@ -101,6 +115,7 @@ const proposal = {
       }
     }
   },
+
 
   //PROPOSAL-2 PAGE
   InsertProposal2Data: async (proposals) => {
@@ -257,7 +272,7 @@ const proposal = {
   },
   //ID TYPE  LIST
 
-  //ALL COUNTRY LIST
+  //ALL Edication LIST
   getEducation: (callback) => {
     async function education() {
       let con;
@@ -277,6 +292,26 @@ const proposal = {
     }
     education();
   },
+  //ALL Religion LIST
+  getReligion: (callback) => {
+    async function religion() {
+      let con;
+      try {
+        con = await oracledb.getConnection({
+          user: "MENU",
+          password: "mayin",
+          connectString: "192.168.3.11/system",
+        });
+        const data = await con.execute(
+          "SELECT RELIGIONS_NAME,RELIGIONS_ID FROM POLICY_MANAGEMENT.ONLINE_RELIGIONS"
+        );
+        callback(null, data.rows);
+      } catch (err) {
+        console.error(err);
+      }
+    }
+    religion();
+  },
 
   //ALL COUNTRY LIST
   getOccupname: (callback) => {
@@ -289,7 +324,7 @@ const proposal = {
           connectString: "192.168.3.11/system",
         });
         const data = await con.execute(
-          "SELECT OCCUPNAME,OCCUP FROM POLICY_MANAGEMENT.ONLINE_OCCUPATION"
+          "SELECT OCCUPNAME,OCCUP FROM POLICY_MANAGEMENT.ONLINE_OCCUPATION ORDER BY OCCUPNAME"
         );
         callback(null, data.rows);
       } catch (err) {
@@ -413,7 +448,7 @@ const proposal = {
           connectString: "192.168.3.11/system",
         });
         const data = await con.execute(
-          "SELECT DIVNAME,DCODE FROM POLICY_MANAGEMENT.DISTRICT ORDER BY DIVNAME"
+          "SELECT DNAME DIVNAME,DCODE FROM POLICY_MANAGEMENT.DISTRICT ORDER BY DIVNAME"
         );
         callback(null, data.rows);
       } catch (err) {
@@ -760,7 +795,7 @@ const proposal = {
       });
 
       const result = await con.execute(
-        "SELECT POLICY_MANAGEMENT.AGE( TO_DATE(:comm_date,'YYYYMMDD'),TO_DATE(:dob,'YYYYMMDD') )FROM DUAL",
+        "SELECT POLICY_MANAGEMENT.AGE( TO_DATE(:comm_date,'YYYYMMDD'),TO_DATE(:dob,'YYYYMMDD') ) FROM sys.DUAL",
         {
           comm_date: comm_date,
           dob: dob,

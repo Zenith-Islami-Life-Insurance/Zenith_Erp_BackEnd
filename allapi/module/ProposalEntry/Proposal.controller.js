@@ -79,6 +79,22 @@ exports.educationList = (req, res) => {
     res.json(formattedDeptHead);
   });
 };
+//all religion list
+exports.religionList = (req, res) => {
+  ProposalModule.getReligion((err, religion) => {
+    if (err) {
+      return res.status(500).json({ error: "Failed to get religion list" });
+    }
+
+    // Map the dept_head data to the desired format
+    const formattedDeptHead = religion.map((head) => ({
+      religion_name: head[0],
+      religion_id: head[1],
+    }));
+
+    res.json(formattedDeptHead);
+  });
+};
 //all occupation list
 exports.getOccupationList = (req, res) => {
   ProposalModule.getOccupname((err, occupation) => {

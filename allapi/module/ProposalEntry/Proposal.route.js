@@ -6,6 +6,7 @@ router
 
   .get("/occupation", ProposalController.getOccupationList)
   .get("/educationList", ProposalController.educationList)
+  .get("/religionList", ProposalController.religionList)
   .get("/all-branch", ProposalController.getAllbranch)
   .get("/country", ProposalController.getCountryList)
   .get("/all-premium", ProposalController.allPremiumList)
