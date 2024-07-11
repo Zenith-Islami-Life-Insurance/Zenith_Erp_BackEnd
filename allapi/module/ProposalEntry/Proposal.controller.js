@@ -274,6 +274,9 @@ exports.getProposalInformation = (req, res) => {
         marital_status: proposal[28],
         nid_number: proposal[29],
         plan_desc: proposal[30],
+        poliy_type: proposal[31],
+        last_edu_doc: proposal[32],
+        marrige_date: proposal[33],
       };
     });
 
