@@ -1,7 +1,11 @@
 const connection = require("../../../utils/ConnectOracle");
 const oracledb = require("oracledb");
 oracledb.initOracleClient({ libDir: "C:\\instantclient_21_3" });
-
+const config = {
+  user: 'MENU',
+  password: 'mayin',
+  connectString: '192.168.3.11/system'  // replace with your actual connection string
+};
 const proposal = {
   //PROPOSAL-1 PAGE
   InsertProposalData: async (proposals) => {
@@ -117,7 +121,383 @@ const proposal = {
       }
     }
   },
+  InsertProposalAddress: async (proposals) => {
+    let con;
 
+    try {
+      con = await oracledb.getConnection({
+        user: "MENU",
+        password: "mayin",
+        connectString: "192.168.3.11/system",
+      });
+      const results = [];
+
+      for (const proposal of proposals) {
+        const {
+          PROPOSAL_N,
+          DCODE,
+          TCODE,
+          POST_CODE
+        } = proposal;
+
+        const result = await con.execute(
+          `INSERT INTO POLICY_MANAGEMENT.PROPOSAL_ADDRESS(PROPOSAL_N,DCODE,TCODE,POST_CODE
+          ) 
+          VALUES(
+            :PROPOSAL_N,
+            :DCODE,
+            :TCODE,
+            :POST_CODE
+          )`,
+          {
+            PROPOSAL_N,
+            DCODE,
+            TCODE,
+            POST_CODE
+          },
+          { autoCommit: true }
+        );
+
+        results.push(result.outBinds);
+      }
+
+      return results;
+    } catch (err) {
+      console.error(err);
+      throw err;
+    } finally {
+      if (con) {
+        try {
+          await con.close();
+        } catch (err) {
+          console.error(err);
+        }
+      }
+    }
+  },
+  InsertProposalExtend: async (proposals) => {
+    let con;
+
+    try {
+      con = await oracledb.getConnection({
+        user: "MENU",
+        password: "mayin",
+        connectString: "192.168.3.11/system",
+      });
+      const results = [];
+
+      for (const proposal of proposals) {
+        const {
+          PROPOSAL_N,
+        } = proposal;
+
+        const result = await con.execute(
+          `INSERT INTO POLICY_MANAGEMENT.PROPOSAL_DUMMY_EXTEND(PROPOSAL_N) 
+           VALUES(:PROPOSAL_N)`,
+          {
+            PROPOSAL_N,
+          },
+          { autoCommit: true }
+        );
+
+        results.push(result.outBinds);
+      }
+
+      return results;
+    } catch (err) {
+      console.error(err);
+      throw err;
+    } finally {
+      if (con) {
+        try {
+          await con.close();
+        } catch (err) {
+          console.error(err);
+        }
+      }
+    }
+  },
+  InsertProposalChain: async (proposals) => {
+    let con;
+    try {
+      con = await oracledb.getConnection({
+        user: "MENU",
+        password: "mayin",
+        connectString: "192.168.3.11/system",
+      });
+      const results = [];
+
+      for (const proposal of proposals) {
+        const {
+          PROPOSAL_N,
+          CHAIN_CODE,
+          USER_ID
+
+        } = proposal;
+
+        const result = await con.execute(
+          `INSERT INTO POLICY_MANAGEMENT.PROPOSAL_DUMMY_CHAIN(PROPOSAL_N,CHAIN_CODE,USER_ID) 
+           VALUES(:PROPOSAL_N,:CHAIN_CODE,:USER_ID)`,
+          {
+            PROPOSAL_N,
+            CHAIN_CODE,
+            USER_ID,
+          },
+          { autoCommit: true }
+        );
+
+        results.push(result.outBinds);
+      }
+
+      return results;
+    } catch (err) {
+      console.error(err);
+      throw err;
+    } finally {
+      if (con) {
+        try {
+          await con.close();
+        } catch (err) {
+          console.error(err);
+        }
+      }
+    }
+  },
+  InsertNominee: async (proposals) => {
+    let con;
+    try {
+      con = await oracledb.getConnection({
+        user: "MENU",
+        password: "mayin",
+        connectString: "192.168.3.11/system",
+      });
+      const results = [];
+
+      for (const proposal of proposals) {
+        const {
+          PROPOSAL_N,
+
+
+        } = proposal;
+
+        const result = await con.execute(
+          `INSERT INTO POLICY_MANAGEMENT.NOMINEE(PROPOSAL_N) 
+           VALUES(:PROPOSAL_N)`,
+          {
+            PROPOSAL_N,
+
+          },
+          { autoCommit: true }
+        );
+
+        results.push(result.outBinds);
+      }
+
+      return results;
+    } catch (err) {
+      console.error(err);
+      throw err;
+    } finally {
+      if (con) {
+        try {
+          await con.close();
+        } catch (err) {
+          console.error(err);
+        }
+      }
+    }
+  },
+  InsertProposalChainSetup: async (proposals) => {
+    let con;
+    try {
+      con = await oracledb.getConnection({
+        user: "MENU",
+        password: "mayin",
+        connectString: "192.168.3.11/system",
+      });
+      const results = [];
+
+      for (const proposal of proposals) {
+        const {
+          PROPOSAL_N,
+          v_fa_code,
+          v_user_id
+        } = proposal;
+
+        const result = await con.execute(
+          `BEGIN
+             POLICY_MANAGEMENT.PROPOSAL_CHAIN_SETUP(:PROPOSAL_N, :v_fa_code, :v_user_id);
+           END;`,
+          {
+            PROPOSAL_N,
+            v_fa_code,
+            v_user_id,
+          },
+          { autoCommit: true }
+        );
+
+        results.push(result);
+      }
+
+      return results;
+    } catch (err) {
+      console.error("Error during insert operation:", err);
+      throw err;
+    } finally {
+      if (con) {
+        try {
+          await con.close();
+        } catch (err) {
+          console.error("Error closing the connection:", err);
+        }
+      }
+    }
+  },
+
+  //update data
+
+  updateTables: async (updateData1, updateData2, proposalNumber) => {
+    let connection;
+
+    try {
+      connection = await oracledb.getConnection(config);
+
+      // Start a transaction
+      await connection.execute('SAVEPOINT sp1');
+
+      // Filter out BRANCH_ID and PROPOSAL_N from updateData1
+      const filteredUpdateData1 = Object.fromEntries(
+        Object.entries(updateData1).filter(([key]) => key !== 'BRANCH_ID' && key !== 'PROPOSAL_N')
+      );
+
+      // Update for the Proposal_Dummy table
+      const setClause1 = Object.keys(filteredUpdateData1)
+        .map((key) => `${key} = :${key}`)
+        .join(', ');
+
+      const sql1 = `UPDATE POLICY_MANAGEMENT.PROPOSAL_DUMMY SET ${setClause1} WHERE PROPOSAL_N = :proposal_number`;
+      const binds1 = { ...filteredUpdateData1, proposal_number: proposalNumber };
+
+      console.log('Executing SQL1:', sql1, 'with binds:', binds1);  // Debugging statement
+      await connection.execute(sql1, binds1);
+
+      // Filter out BRANCH_ID and PROPOSAL_N from updateData2
+      const filteredUpdateData2 = Object.fromEntries(
+        Object.entries(updateData2).filter(([key]) => key !== 'BRANCH_ID' && key !== 'PROPOSAL_N')
+      );
+
+      // Update for the Address table
+      const setClause2 = Object.keys(filteredUpdateData2)
+        .map((key) => `${key} = :${key}`)
+        .join(', ');
+
+      const sql2 = `UPDATE POLICY_MANAGEMENT.PROPOSAL_ADDRESS SET ${setClause2} WHERE PROPOSAL_N = :proposal_number`;
+      const binds2 = { ...filteredUpdateData2, proposal_number: proposalNumber };
+
+      console.log('Executing SQL2:', sql2, 'with binds:', binds2);  // Debugging statement
+      await connection.execute(sql2, binds2);
+
+      // Commit the transaction
+      await connection.commit();
+
+      return true;
+
+    } catch (err) {
+      if (connection) {
+        try {
+          // Rollback the transaction if there is an error
+          await connection.execute('ROLLBACK');
+        } catch (rollbackErr) {
+          console.error('Error during rollback:', rollbackErr);
+        }
+      }
+      console.error('Error updating the tables:', err);
+      throw err;
+    } finally {
+      if (connection) {
+        try {
+          await connection.close();
+        } catch (err) {
+          console.error('Error closing the connection:', err);
+        }
+      }
+    }
+  },
+
+
+
+  // getSumAssured: async (values) => {
+  //   let con;
+  //   try {
+  //     con = await oracledb.getConnection({
+  //       user: "MENU",
+  //       password: "mayin",
+  //       connectString: "192.168.3.11/system",
+  //     });
+
+  //     const results = [];
+
+  //     for (const value of values) {
+  //       const {
+  //         MPLAN,
+  //         MTERM,
+  //         MAGE,
+  //         MINSTMODE,
+  //         MSUMASS,
+  //         OPTION_M,
+  //         V_PENSION,
+  //         VDEATH_COVERAGE
+  //       } = value;
+
+  //       const result = await con.execute(
+  //         `SELECT CEIL(POLICY_MANAGEMENT.PREMIUM_VAL_NEW(
+  //             :MPLAN,
+  //             :MTERM,
+  //             :MAGE,
+  //             :MINSTMODE,
+  //             :MSUMASS,
+  //             :OPTION_M,
+  //             :V_PENSION,
+  //             :VDEATH_COVERAGE
+  //           )) AS AMOUNT FROM DUAL`,
+  //         {
+  //           MPLAN,
+  //           MTERM,
+  //           MAGE,
+  //           MINSTMODE,
+  //           MSUMASS,
+  //           OPTION_M,
+  //           V_PENSION,
+  //           VDEATH_COVERAGE
+  //         }
+  //       );
+
+  //       console.log("Query result:", result);
+
+  //       if (result.rows && result.rows.length > 0) {
+  //         const amount = result.rows[0][0]; // Correctly accessing the amount
+  //         console.log("Amount fetched:", amount);
+  //         results.push(amount);
+  //       } else {
+  //         console.log("No rows returned or result.rows is null.");
+  //         results.push(null);
+  //       }
+  //     }
+
+  //     return results;
+  //   } catch (err) {
+  //     console.error("Error during database operation:", err);
+  //     throw err;
+  //   } finally {
+  //     if (con) {
+  //       try {
+  //         await con.close();
+  //       } catch (err) {
+  //         console.error("Error closing the connection:", err);
+  //       }
+  //     }
+  //   }
+  // },
 
   //PROPOSAL-2 PAGE
   InsertProposal2Data: async (proposals) => {
@@ -164,59 +544,6 @@ const proposal = {
           console.error(err);
         }
       }
-    }
-  },
-
-  //// update 
-  // async updateData(dataToUpdate, condition) {
-  //   let connection;
-  //   try {
-  //     connection = await oracledb.getConnection();
-  //     const query = `UPDATE YourTable SET column1 = :value1 WHERE condition = :condition`;
-  //     const result = await connection.execute(query, { value1: dataToUpdate, condition: condition });
-  //     return result.rowsAffected;
-  //   } catch (error) {
-  //     console.error('Error updating data:', error);
-  //     throw error;
-  //   } finally {
-  //     if (connection) {
-  //       try {
-  //         await connection.close();
-  //       } catch (error) {
-  //         console.error('Error closing connection:', error);
-  //       }
-  //     }
-  //   }
-  // },
-  updateBychno: async (PROPOSAL_N, updatedpurchase) => {
-    let con;
-    try {
-      con = await oracledb.getConnection({
-        user: "MENU",
-        password: "mayin",
-        connectString: "192.168.3.11/system",
-      });
-
-      const result = await con.execute(
-        `UPDATE POLICY_MANAGEMENT.PROPOSAL_DUMMY 
-       SET ADDRESS2 = :ADDRESS2, ADDRESS3 = :ADDRESS3, ZIP = :ZIP 
-       WHERE PROPOSAL_N = :PROPOSAL_N`,
-        {
-          ADDRESS2: updatedpurchase.ADDRESS2,
-          ADDRESS3: updatedpurchase.ADDRESS3,
-          ZIP: updatedpurchase.ZIP,
-          PROPOSAL_N: PROPOSAL_N
-        },
-        { autoCommit: true }
-      );
-
-      // Release the connection
-      await con.release();
-
-      return result.rowsAffected || 0;
-    } catch (err) {
-      console.error("Error updating purchase:", err);
-      throw err; // Propagate the error to the caller
     }
   },
 
@@ -698,7 +1025,7 @@ const proposal = {
       });
 
       const result = await con.execute(
-        "SELECT PLAN_ID, PLAN_DESCRIPTION, CALCULATION_TYPE, MIN_AGE, MAX_AGE, MIN_TERM, MAX_TERM, MIN_SUMINS, MAX_SUMINS FROM POLICY_MANAGEMENT.PLANS WHERE :AGE BETWEEN MIN_AGE AND MAX_AGE AND IDRA_SENT = 'Y'",
+        "SELECT PLAN_ID, PLAN_DESCRIPTION,SUPPLEMENTARY,EXTRA_LOADING,MAJOR_DIEASES_RIDER,INPATIENT_RIDER,PREMIUM_WAIVER, CALCULATION_TYPE, MIN_AGE, MAX_AGE, MIN_TERM, MAX_TERM, MIN_SUMINS, MAX_SUMINS FROM POLICY_MANAGEMENT.PLANS WHERE :AGE BETWEEN MIN_AGE AND MAX_AGE AND IDRA_SENT = 'Y'",
         { age: age }
       );
 
@@ -762,7 +1089,7 @@ const proposal = {
       });
 
       const result = await con.execute(
-        "SELECT DISTINCT TERM from POLICY_MANAGEMENT.POLICY01 WHERE TABLE_ID=:plan_id AND AGE<=:age",
+        "SELECT DISTINCT TERM from POLICY_MANAGEMENT.POLICY01 WHERE TABLE_ID=:plan_id AND AGE<=:age ORDER BY TERM",
         {
           plan_id: plan_id,
           age: age,
@@ -856,7 +1183,7 @@ const proposal = {
   },
 
   //rate calculation
-  getRateCalcultion: async (age, term, table_id, callback) => {
+  getRateCalcultion: async (age, term, table_id, cAge, callback) => {
     let con;
     try {
       con = await oracledb.getConnection({
@@ -866,15 +1193,10 @@ const proposal = {
       });
 
       const result = await con.execute(
-        "SELECT RATE,FACTOR FROM POLICY_MANAGEMENT.POLICY01 WHERE AGE=:age AND TERM=:term AND TABLE_ID=:table_id",
-        {
-          age: age,
-          term: term,
-          table_id: table_id,
-        }
+        "SELECT RATE, FACTOR FROM POLICY_MANAGEMENT.POLICY01 WHERE AGE=:age AND TERM=:term AND TABLE_ID=:table_id AND C_AGE=:cAge",
+        { age, term, table_id, cAge }
       );
 
-      // Assuming you want to return the first row
       const data = result;
       callback(null, data.rows);
     } catch (err) {
@@ -890,6 +1212,7 @@ const proposal = {
       }
     }
   },
+
 
   //ALL PREMIUM LIST
   getPremiumlist: (callback) => {
@@ -966,7 +1289,7 @@ const proposal = {
   },
 
   //ALL SUPPL. CLASS LIST
-  getSupplClasslist: (callback) => {
+  getSupplClasslist: (occup_id, supp_code, callback) => {
     async function SupplClass() {
       let con;
       try {
@@ -976,15 +1299,37 @@ const proposal = {
           connectString: "192.168.3.11/system",
         });
         const data = await con.execute(
-          "SELECT * FROM POLICY_MANAGEMENT.SUPPLEMENTARY_CLASS"
+          `SELECT CLASS_ID, CLASS_NAME 
+           FROM (
+             SELECT DISTINCT a.CLASS_ID, b.CLASS_NAME 
+             FROM POLICY_MANAGEMENT.SUPPLEMENTARY_RATE a, POLICY_MANAGEMENT.SUPPLEMENTARY_CLASS b 
+             WHERE a.CLASS_ID = b.CLASS_ID 
+             AND OCCUP = :occup_id 
+             AND SUPP_CODE = :supp_code
+           ) 
+           ORDER BY CLASS_ID`,
+          {
+            occup_id: occup_id,
+            supp_code: supp_code,
+          }
         );
         callback(null, data.rows);
       } catch (err) {
         console.error(err);
+        callback(err, null);
+      } finally {
+        if (con) {
+          try {
+            await con.close();
+          } catch (err) {
+            console.error(err);
+          }
+        }
       }
     }
     SupplClass();
   },
+
   //ALL SUPPL.  LIST
   getSuppllist: (callback) => {
     async function SuppliClass() {
@@ -1053,14 +1398,16 @@ const proposal = {
     }
   },
 
-  //BASIC PREMIUM CALCULATION
+  //new basic premium date:12/08/2024
   getBasicPremium: async (
-    table_id,
-    term_id,
-    age,
-    instmode,
-    sum_ass,
-    planoption,
+    tableId,
+    termId,
+    userAge,
+    instMode,
+    sumAss,
+    userOption,
+    pensionValue,
+    deathCoverage,
     callback
   ) => {
     let con;
@@ -1072,17 +1419,67 @@ const proposal = {
       });
 
       const result = await con.execute(
-        "SELECT  ROUND(POLICY_MANAGEMENT.PREMIUM_VAL_NEW(:table_id,:term_id,:age,:instmode,:sum_ass,:planoption,NULL,'N'),2) FROM SYS.DUAL",
+        "SELECT CEIL(POLICY_MANAGEMENT.PREMIUM_VAL_NEW(:tableId, :termId, :userAge, :instMode, :sumAss, :userOption, :pensionValue, :deathCoverage)) AS BASIC_PREMIUM FROM DUAL",
+        {
+          tableId: tableId,
+          termId: termId,
+          userAge: userAge,
+          instMode: instMode,
+          sumAss: sumAss,
+          userOption: userOption,
+          pensionValue: pensionValue,
+          deathCoverage: deathCoverage,
+        }
+      );
+
+      const data = result.rows;
+
+      if (data && data.length > 0) {
+        callback(null, data);
+      } else {
+        callback(null, []);
+      }
+    } catch (err) {
+      console.error(err);
+      callback(err, null);
+    } finally {
+      if (con) {
+        try {
+          await con.close();
+        } catch (err) {
+          console.error(err);
+        }
+      }
+    }
+  },
+
+  //sumassurance
+  getSumassurance: async (
+    table_id,
+    term_id,
+    age,
+    monthlyPremium,
+    sum_insured,
+    callback
+  ) => {
+    let con;
+    try {
+      con = await oracledb.getConnection({
+        user: "MENU",
+        password: "mayin",
+        connectString: "192.168.3.11/system",
+      });
+
+      const result = await con.execute(
+        "SELECT (POLICY_MANAGEMENT.SUMINSURE_VALUE_NEW(:table_id,:term_id,:age,:monthlyPremium,:sum_insured)) FROM DUAL",
         {
           table_id: table_id,
           term_id: term_id,
           age: age,
-          instmode: instmode,
-          sum_ass: sum_ass,
-          planoption: planoption,
+          monthlyPremium: monthlyPremium,
+          sum_insured: sum_insured,
         }
       );
-
       // Assuming you want to return the first row
       const data = result;
       callback(null, data.rows);
@@ -1339,7 +1736,7 @@ const proposal = {
   },
 
   //get supplimentary rate
-  getSuppRate: async (occup_code, supp_code, class_id, n_mode, callback) => {
+  getSuppRate: async (occup_code, supp_code, class_id, callback) => {
     let con;
     try {
       con = await oracledb.getConnection({
@@ -1349,18 +1746,17 @@ const proposal = {
       });
 
       const result = await con.execute(
-        "SELECT NVL(FINAL_RATE,0) FROM POLICY_MANAGEMENT.SUPPLEMENTARY_RATE_FINAL WHERE OCCUP=:occup_code AND SUPP_CODE=:supp_code AND CLASS_ID=:class_id  AND N_MODE=:n_mode",
+        "select RATE from POLICY_MANAGEMENT.SUPPLEMENTARY_RATE where OCCUP=:occup_code and SUPP_CODE=:supp_code and CLASS_ID=:class_id",
         {
           occup_code: occup_code,
           supp_code: supp_code,
           class_id: class_id,
-          n_mode: n_mode,
         }
       );
 
       // Assuming you want to return the first row
-      const data = result;
-      callback(null, data.rows);
+      const data = result.rows;
+      callback(null, data);
     } catch (err) {
       console.error(err);
       callback(err, null);
@@ -1374,6 +1770,7 @@ const proposal = {
       }
     }
   },
+
 
   //get Occupation premium and rate
   getOErate: async (

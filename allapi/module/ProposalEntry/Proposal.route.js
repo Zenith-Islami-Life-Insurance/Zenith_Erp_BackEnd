@@ -20,14 +20,20 @@ router
   .get("/proposal-info", ProposalController.getProposalInformation)
 
   .get("/policy-info", ProposalController.getPolicyInformation)
-
   .get("/agent-list/:base_project", ProposalController.getAgentList)
   .get("/all-district", ProposalController.getAllDivision)
   .get("/thana-list/:div_code", ProposalController.getThanaList)
   .get("/post-office/:code", ProposalController.getPostofficeList)
   .post("/proposal-entry", ProposalController.InsertProposalDataController)
+  .post("/proposal-entry-address", ProposalController.InsertProposalAddressDataController)
+  .post("/proposal-entry-extend", ProposalController.InsertProposalExtendDataController)
+  .post("/proposal-entry-chain", ProposalController.InsertProposalChainDataController)
+  .post("/nominee", ProposalController.InsertNomineeController)
+  .post("/proposal-entry-chain-setup", ProposalController.InsertProposalChainSetupDataController)
   .post("/proposal-entry2", ProposalController.InsertProposal2DataController)
+  .post('/sumAssured', ProposalController.getSumAssuredController)
   .patch("/proposal-update/:PROPOSAL_N", ProposalController.updatepurchaseByChno)
+  .put("/update_proposal/:PROPOSAL_N", ProposalController.updateTablesController)
 
   .get("/proposal-number", ProposalController.getProposalNumber)
   .get(
@@ -45,10 +51,10 @@ router
     "/total-installment/:pay_mode/:term",
     ProposalController.getTotalInstallments
   )
-  .get("/suppli-class", ProposalController.supplimentClassList)
+  .get('/suppli-class/:occup_id/:supp_code', ProposalController.supplimentClassList)
   .get("/suppliment-list", ProposalController.supplimentList)
   .get(
-    "/rate-calculation/:age/:term/:table_id",
+    "/rate-calculation/:age/:term/:table_id/:cAge",
     ProposalController.getRateCalcultions
   )
   .get(
@@ -56,8 +62,12 @@ router
     ProposalController.getSupplimentValue
   )
   .get(
-    "/basic-premium/:table_id/:term_id/:age/:instmode/:sum_ass/:planoption",
+    "/basic-premium/:table_id/:term_id/:age/:instmode/:sum_ass/:option/:pension/:death_coverage",
     ProposalController.getBasicPremValue
+  )
+  .get(
+    "/sumAssurance/:table_id/:term_id/:age/:monthlyPremium/:sum_insured",
+    ProposalController.getSumAssurance
   )
 
   .get("/endAtDate/:RISKDATE", ProposalController.getEndatDate)
@@ -79,7 +89,7 @@ router
     ProposalController.getWaiverPremium
   )
   .get(
-    "/suppli-rate/:occup_code/:supp_code/:class_id/:n_mode",
+    "/suppli-rate/:occup_code/:supp_code/:class_id",
     ProposalController.getSupplimentaryRate
   )
 

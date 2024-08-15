@@ -13,6 +13,119 @@ exports.InsertProposalDataController = async (req, res) => {
     res.status(500).json({ success: false, error: "Internal Server Error" });
   }
 };
+exports.InsertProposalAddressDataController = async (req, res) => {
+  try {
+    const proposals = req.body;
+    console.log(proposals)
+    const results = await ProposalModule.InsertProposalAddress(
+      Array.isArray(proposals) ? proposals : [proposals]
+    );
+    console.log(results)
+    res.status(200).json({
+      success: true,
+      message: "Proposal Address Entry Successfully",
+      data: results,
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ success: false, error: "Internal Server Error" });
+  }
+};
+exports.InsertProposalExtendDataController = async (req, res) => {
+  try {
+    const proposals = req.body;
+    console.log(proposals)
+    const results = await ProposalModule.InsertProposalExtend(
+      Array.isArray(proposals) ? proposals : [proposals]
+    );
+    console.log(results)
+    res.status(200).json({
+      success: true,
+      message: "Proposal Extend Entry Successfully",
+      data: results,
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ success: false, error: "Internal Server Error" });
+  }
+};
+exports.InsertProposalChainDataController = async (req, res) => {
+  try {
+    const proposals = req.body;
+    console.log(proposals)
+    const results = await ProposalModule.InsertProposalChain(
+      Array.isArray(proposals) ? proposals : [proposals]
+    );
+    console.log(results)
+    res.status(200).json({
+      success: true,
+      message: "Proposal Chain Entry Successfully",
+      data: results,
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ success: false, error: "Internal Server Error" });
+  }
+};
+exports.InsertNomineeController = async (req, res) => {
+  try {
+    const proposals = req.body;
+    console.log(proposals)
+    const results = await ProposalModule.InsertNominee(
+      Array.isArray(proposals) ? proposals : [proposals]
+    );
+    console.log(results)
+    res.status(200).json({
+      success: true,
+      message: "Proposal Chain Entry Successfully",
+      data: results,
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ success: false, error: "Internal Server Error" });
+  }
+};
+
+exports.InsertProposalChainSetupDataController = async (req, res) => {
+  try {
+    const proposals = req.body;
+    console.log(proposals)
+    const results = await ProposalModule.InsertProposalChainSetup(
+      Array.isArray(proposals) ? proposals : [proposals]
+    );
+    console.log(results)
+    res.status(200).json({
+      success: true,
+      message: "Proposal Chain Entry Successfully",
+      data: results,
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ success: false, error: "Internal Server Error" });
+  }
+};
+//get sum assured 
+exports.getSumAssuredController = async (req, res) => {
+  try {
+    const values = req.body;
+    console.log("Received values:", values);
+
+    const results = await ProposalModule.getSumAssured(
+      Array.isArray(values) ? values : [values]
+    );
+
+    console.log("Results:", results);
+    res.status(200).json({
+      success: true,
+      message: "Sum assured calculated successfully",
+      data: results,
+    });
+  } catch (err) {
+    console.error("Error in getSumAssuredController:", err);
+    res.status(500).json({ success: false, error: "Internal Server Error" });
+  }
+};
+
 exports.InsertProposal2DataController = async (req, res) => {
   try {
     const proposals = req.body;
@@ -26,6 +139,26 @@ exports.InsertProposal2DataController = async (req, res) => {
     res.status(500).json({ success: false, error: "Internal Server Error" });
   }
 };
+//newupdate 
+exports.updateTablesController = async (req, res) => {
+  const proposalNumber = req.params.PROPOSAL_N;
+  const { updateData1, updateData2 } = req.body;
+  console.log(updateData1, updateData2, proposalNumber)
+
+  try {
+    const success = await ProposalModule.updateTables(updateData1, updateData2, proposalNumber);
+
+    if (success) {
+      res.status(200).json({ message: 'Tables updated successfully' });
+    } else {
+      res.status(404).json({ message: 'No rows updated' });
+    }
+
+  } catch (err) {
+    res.status(500).json({ message: 'Internal server error', error: err.message });
+  }
+};
+
 
 // update proposal
 exports.updatepurchaseByChno = async (req, res) => {
@@ -473,13 +606,18 @@ exports.getAllPlanList = (req, res) => {
       return {
         plan_id: head[0],
         plan_name: head[1],
-        calcu_type: head[2],
-        min_age: head[3],
-        max_age: head[4],
-        min_term: head[5],
-        max_term: head[6],
-        min_suminsured: head[7],
-        max_suminsured: head[8],
+        suplimentary: head[2],
+        extra_loading: head[3],
+        major_diseage: head[4],
+        impatient_reader: head[5],
+        prem_waiver: head[6],
+        calcu_type: head[7],
+        min_age: head[8],
+        max_age: head[9],
+        min_term: head[10],
+        max_term: head[11],
+        min_suminsured: head[12],
+        max_suminsured: head[13],
       };
     });
 
@@ -585,19 +723,18 @@ exports.getTotalInstallments = (req, res) => {
 
 //rate calculation
 exports.getRateCalcultions = (req, res) => {
-  const age = req.params.age;
-  const term = req.params.term;
-  const table_id = req.params.table_id;
+  console.log('Request URL:', req.url);
+  console.log('Request Params:', req.params);
+  const { age, term, table_id, cAge } = req.params;
 
   ProposalModule.getRateCalcultion(
     age,
     term,
     table_id,
+    cAge,
     (err, total_installment) => {
       if (err) {
-        return res
-          .status(500)
-          .json({ error: "Failed to get rate calculation" });
+        return res.status(500).json({ error: "Failed to get rate calculation" });
       }
 
       if (!total_installment || total_installment.length === 0) {
@@ -668,7 +805,15 @@ exports.getBranchList = (req, res) => {
 
 //supplimentary_class list
 exports.supplimentClassList = (req, res) => {
-  ProposalModule.getSupplClasslist((err, blist) => {
+  // Extract URL parameters
+  const { occup_id, supp_code } = req.params;
+  console.log(req.params)
+  // Validate input parameters
+  if (!occup_id || !supp_code) {
+    return res.status(400).json({ error: "occup_id and supp_code are required" });
+  }
+
+  ProposalModule.getSupplClasslist(occup_id, supp_code, (err, blist) => {
     if (err) {
       return res.status(500).json({ error: "Failed to get SupplClass list" });
     }
@@ -678,6 +823,7 @@ exports.supplimentClassList = (req, res) => {
       class_id: sClas[0],
       class_name: sClas[1],
     }));
+
     res.json(supplimentList);
   });
 };
@@ -732,12 +878,16 @@ exports.getSupplimentValue = (req, res) => {
 };
 //get basic premium value
 exports.getBasicPremValue = (req, res) => {
-  const table_id = req.params.table_id;
-  const term_id = req.params.term_id;
-  const age = req.params.age;
-  const instmode = req.params.instmode;
-  const sum_ass = req.params.sum_ass;
-  const planoption = req.params.planoption;
+  const {
+    table_id,
+    term_id,
+    age,
+    instmode,
+    sum_ass,
+    option,
+    pension,
+    death_coverage
+  } = req.params;
 
   ProposalModule.getBasicPremium(
     table_id,
@@ -745,7 +895,42 @@ exports.getBasicPremValue = (req, res) => {
     age,
     instmode,
     sum_ass,
-    planoption,
+    option,
+    pension,
+    death_coverage,
+    (err, prem) => {
+      if (err) {
+        return res.status(500).json({ error: "Failed to get basic premium value" });
+      }
+
+      if (prem.length > 0) {
+        // Map the data to the desired format
+        const formattedDeptHead = prem.map((row) => ({
+          basic_premium: row[0],
+        }));
+        res.json(formattedDeptHead);
+      } else {
+        res.status(404).json({ message: "No basic premium value found" });
+      }
+    }
+  );
+};
+
+// get sum assurance
+exports.getSumAssurance = (req, res) => {
+  const { table_id,
+    term_id,
+    age,
+    monthlyPremium,
+    sum_insured, } = req.params;
+
+
+  ProposalModule.getSumassurance(
+    table_id,
+    term_id,
+    age,
+    monthlyPremium,
+    sum_insured,
     (err, prem) => {
       if (err) {
         return res
@@ -754,9 +939,7 @@ exports.getBasicPremValue = (req, res) => {
       }
 
       // Map the dept_head data to the desired format
-      const formattedDeptHead = prem.map((head) => ({
-        basic_premium: head[0],
-      }));
+      const formattedDeptHead = prem.map((head) => head[0] || null);
 
       res.json(formattedDeptHead);
     }
@@ -917,31 +1100,32 @@ exports.getWaiverPremium = (req, res) => {
 
 //get supplimentary rate
 exports.getSupplimentaryRate = (req, res) => {
+  console.log(req.params);
   const occup_code = req.params.occup_code;
   const supp_code = req.params.supp_code;
   const class_id = req.params.class_id;
-  const n_mode = req.params.n_mode;
 
   ProposalModule.getSuppRate(
     occup_code,
     supp_code,
     class_id,
-    n_mode,
     (err, prem) => {
       if (err) {
         return res
           .status(500)
           .json({ error: "Failed to get supplimentary rate" });
       }
-      // Map the dept_head data to the desired format
-      const formattedData = prem.map((head) => ({
-        supp_rate: head[0],
+
+      // Map the rate data to the desired format
+      const formattedData = prem.map((row) => ({
+        supp_rate: row[0],
       }));
 
       res.json(formattedData);
     }
   );
 };
+
 
 //get Occupation premium rate
 exports.getOccupPremRate = (req, res) => {
