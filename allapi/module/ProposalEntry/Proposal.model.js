@@ -1790,9 +1790,9 @@ const proposal = {
         password: "mayin",
         connectString: "192.168.3.11/system",
       });
-
+      // "SELECT POLICY_MANAGEMENT.OCCUP_EXTRA_NEW (:table_id,:occup_code,:gender,:sum_assured,:last_education,:last_education_document,NVL(:instmode,'1')) FROM SYS.DUAL",
       const result = await con.execute(
-        "SELECT POLICY_MANAGEMENT.OCCUP_EXTRA_NEW (:table_id,:occup_code,:gender,:sum_assured,:last_education,:last_education_document,NVL(:instmode,'1')) FROM SYS.DUAL",
+        "SELECT POLICY_MANAGEMENT.LOADING_VAL_NEW(:table_id,:occup_code,:gender,:sum_assured,:last_education,:last_education_document,:instmode) FROM SYS.DUAL",
         {
           table_id: table_id,
           occup_code: occup_code,
@@ -1822,6 +1822,7 @@ const proposal = {
   },
 
   //get Hospital premium and rate
+
   getHospitalPremRate: async (
     table_id,
     occup_code,
@@ -1839,9 +1840,9 @@ const proposal = {
         password: "mayin",
         connectString: "192.168.3.11/system",
       });
-
+      // "SELECT POLICY_MANAGEMENT.HOSPITAL_EXTRA_NEW (:table_id,:occup_code,:gender,:sum_assured,:last_education,:last_education_document,NVL(:instmode,'1')) FROM SYS.DUAL",
       const result = await con.execute(
-        "SELECT POLICY_MANAGEMENT.HOSPITAL_EXTRA_NEW (:table_id,:occup_code,:gender,:sum_assured,:last_education,:last_education_document,NVL(:instmode,'1')) FROM SYS.DUAL",
+        "SELECT POLICY_MANAGEMENT.LOADING_VAL_NEW(:table_id,:occup_code,:gender,:sum_assured,:last_education,:last_education_document,:instmode) FROM SYS.DUAL",
         {
           table_id: table_id,
           occup_code: occup_code,
@@ -1869,5 +1870,40 @@ const proposal = {
       }
     }
   },
+
+  // get hospital and occupation rate
+  getOccupationRate: async (occup, callback) => {
+    let con;
+    try {
+      con = await oracledb.getConnection({
+        user: "MENU",
+        password: "mayin",
+        connectString: "192.168.3.11/system",
+      });
+
+      const result = await con.execute(
+        "SELECT NVL(OE_FE_RATE, 0) FROM POLICY_MANAGEMENT.ONLINE_OCCUPATION WHERE OCCUP = :occup",
+        {
+          occup: occup,
+        }
+      );
+
+      // Assuming you want to return the first row and the first column
+      const data = result.rows.length > 0 ? result.rows[0][0] : 0;
+      callback(null, data);
+    } catch (err) {
+      console.error(err);
+      callback(err, null);
+    } finally {
+      if (con) {
+        try {
+          await con.close();
+        } catch (err) {
+          console.error(err);
+        }
+      }
+    }
+  },
+
 };
 module.exports = proposal;

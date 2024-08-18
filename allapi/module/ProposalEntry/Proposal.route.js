@@ -92,14 +92,13 @@ router
     "/suppli-rate/:occup_code/:supp_code/:class_id",
     ProposalController.getSupplimentaryRate
   )
-
   .get(
-    "/oe-rate/:table_id/:occup_code/:gender/:sum_assured/:last_education/:last_education_document/:instmode",
-    ProposalController.getOccupPremRate
+    "/occupRate/:occup",
+    ProposalController.getOccupationRate
   )
 
   .get(
-    "/hospital-premrate/:table_id/:occup_code/:gender/:sum_assured/:last_education/:last_education_document/:instmode",
+    "/hospital-prem/:table_id/:occup_code/:gender/:sum_assured/:last_education/:last_education_document/:instmode",
     ProposalController.getHospitalPremRate
   )
 

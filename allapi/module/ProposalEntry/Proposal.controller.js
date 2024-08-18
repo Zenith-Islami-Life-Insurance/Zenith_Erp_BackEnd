@@ -1161,7 +1161,7 @@ exports.getOccupPremRate = (req, res) => {
   );
 };
 
-//get Hospital premium rate
+//get Hospital and Occupation premium 
 exports.getHospitalPremRate = (req, res) => {
   const table_id = req.params.table_id;
   const occup_code = req.params.occup_code;
@@ -1170,7 +1170,7 @@ exports.getHospitalPremRate = (req, res) => {
   const last_education = req.params.last_education;
   const last_education_document = req.params.last_education_document;
   const instmode = req.params.instmode;
-
+  console.log(table_id, occup_code, gender, sum_assured, last_education, last_education_document, instmode)
   ProposalModule.getHospitalPremRate(
     table_id,
     occup_code,
@@ -1193,4 +1193,22 @@ exports.getHospitalPremRate = (req, res) => {
       res.json(formattedData);
     }
   );
+};
+// get Hospital and Occupation Rate data
+exports.getOccupationRate = (req, res) => {
+  const occup = req.params.occup;
+
+  // Assuming you have a module similar to ProposalModule to interact with your database
+  ProposalModule.getOccupationRate(occup, (err, rate) => {
+    if (err) {
+      return res.status(500).json({ error: "Failed to get occupation rate" });
+    }
+
+    // If the result is a single value, no need to map over it
+    const formattedData = {
+      occupationRate: rate || 0,
+    };
+
+    res.json(formattedData);
+  });
 };
