@@ -1212,3 +1212,88 @@ exports.getOccupationRate = (req, res) => {
     res.json(formattedData);
   });
 };
+//get Waiver Premium data
+exports.getWaiverPremiumController = (req, res) => {
+  const { age, table_id, premium } = req.params;
+
+  ProposalModule.getWaiverPrem(age, table_id, premium, (err, prem) => {
+    if (err) {
+      return res.status(500).json({ error: "Failed to get Waiver Premium data" });
+    }
+
+    // If 'prem' is an array of arrays, map it to return the desired format
+    const formattedData = prem.map((row) => ({
+      waiver_prem: row[0], // Accessing the first element of each row (since each row is an array)
+    }));
+
+    res.json(formattedData);
+  });
+};
+// get MDR Premium data
+exports.getMdrPremiumController = (req, res) => {
+  const { table_id, term, dob, com_date, sumAssurance, instmode, prem } = req.params;
+
+  console.log("Received Parameters: ", req.params);
+
+  ProposalModule.getMdrPremium(
+    table_id,
+    term,
+    dob,  // Expecting YYYYMMDD format
+    com_date,  // Expecting YYYYMMDD format
+    sumAssurance,
+    instmode,
+    prem,
+    (err, datas) => {
+      if (err) {
+        return res.status(500).json({ error: "Failed to get MDR Premium" });
+      }
+
+      if (!datas || datas.length === 0) {
+        return res.status(404).json({ message: "No data found" });
+      }
+
+      const formattedData = datas.map((row) => ({
+        mdr_prem: row[0],
+      }));
+
+      res.json(formattedData);
+    }
+  );
+};
+// get MDR Rate data
+exports.getMdrRateController = (req, res) => {
+  const { table_id, term, dob, com_date, sumAssurance, instmode, rate } = req.params;
+
+  console.log("Received Parameters: ", req.params);
+
+  ProposalModule.getMdrRate(
+    table_id,
+    term,
+    dob,
+    com_date,
+    sumAssurance,
+    instmode,
+    rate,
+    (err, datas) => {
+      if (err) {
+        return res.status(500).json({ error: "Failed to get MDR Rate" });
+      }
+
+      if (!datas || datas.length === 0) {
+        return res.status(404).json({ message: "No data found" });
+      }
+
+      const formattedData = datas.map((row) => ({
+        mdr_rate: row[0],
+      }));
+
+      res.json(formattedData);
+    }
+  );
+};
+
+
+
+
+
+

@@ -1905,5 +1905,161 @@ const proposal = {
     }
   },
 
+  //get waiver premium
+  getWaiverPrem: async (
+    age,
+    table_id,
+    premium,
+    callback
+  ) => {
+    let con;
+    try {
+      con = await oracledb.getConnection({
+        user: "MENU",
+        password: "mayin",
+        connectString: "192.168.3.11/system",
+      });
+      const result = await con.execute(
+        "SELECT POLICY_MANAGEMENT.PREMIUM_WAIVER(:age,:table_id,:premium) FROM SYS.DUAL",
+        {
+          age: age,
+          table_id: table_id,
+          premium: premium
+
+        }
+      );
+      const data = result;
+      callback(null, data.rows);
+    } catch (err) {
+      console.error(err);
+      callback(err, null);
+    } finally {
+      if (con) {
+        try {
+          await con.close();
+        } catch (err) {
+          console.error(err);
+        }
+      }
+    }
+  },
+  // get MDR Premium 
+  getMdrPremium: async (
+    table_id,
+    term,
+    dob,
+    com_date,
+    sumAssurance,
+    instmode,
+    prem,
+    callback
+  ) => {
+    let con;
+    try {
+      con = await oracledb.getConnection({
+        user: "MENU",
+        password: "mayin",
+        connectString: "192.168.3.11/system",
+      });
+
+      const result = await con.execute(
+        `SELECT POLICY_MANAGEMENT.CRITICAL_ILLNESS_CALC_NEW(
+          :table_id,
+          :term,
+          TO_DATE(:dob,'YYYYMMDD'),
+          TO_DATE(:com_date,'YYYYMMDD'),
+          :sumAssurance,
+          :instmode,
+          :prem
+        ) AS xx FROM DUAL`,
+        {
+          table_id: table_id,
+          term: term,
+          dob: dob, // Pass as YYYYMMDD
+          com_date: com_date, // Pass as YYYYMMDD
+          sumAssurance: sumAssurance,
+          instmode: instmode,
+          prem: prem,
+        }
+      );
+
+      console.log("SQL Result: ", result);
+
+      const data = result.rows || [];
+      callback(null, data);
+    } catch (err) {
+      console.error("SQL Execution Error: ", err);
+      callback(err, null);
+    } finally {
+      if (con) {
+        try {
+          await con.close();
+        } catch (err) {
+          console.error("Error closing connection: ", err);
+        }
+      }
+    }
+  },
+  // get MDR Raty 
+  getMdrRate: async (
+    table_id,
+    term,
+    dob,
+    com_date,
+    sumAssurance,
+    instmode,
+    rate,
+    callback
+  ) => {
+    let con;
+    try {
+      con = await oracledb.getConnection({
+        user: "MENU",
+        password: "mayin",
+        connectString: "192.168.3.11/system",
+      });
+
+      const result = await con.execute(
+        `SELECT POLICY_MANAGEMENT.CRITICAL_ILLNESS_CALC_NEW(
+          :table_id,
+          :term,
+          TO_DATE(:dob,'YYYYMMDD'),
+          TO_DATE(:com_date,'YYYYMMDD'),
+          :sumAssurance,
+          :instmode,
+          :rate
+        ) AS xx FROM DUAL`,
+        {
+          table_id: table_id,
+          term: term,
+          dob: dob,
+          com_date: com_date,
+          sumAssurance: sumAssurance,
+          instmode: instmode,
+          rate: rate,
+        }
+      );
+
+      console.log("SQL Result: ", result);
+
+      const data = result.rows || [];
+      callback(null, data);
+    } catch (err) {
+      console.error("SQL Execution Error: ", err);
+      callback(err, null);
+    } finally {
+      if (con) {
+        try {
+          await con.close();
+        } catch (err) {
+          console.error("Error closing connection: ", err);
+        }
+      }
+    }
+  },
+
+
+
+
 };
 module.exports = proposal;

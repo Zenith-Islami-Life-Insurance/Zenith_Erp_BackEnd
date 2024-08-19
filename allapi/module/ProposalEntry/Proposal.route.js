@@ -96,10 +96,22 @@ router
     "/occupRate/:occup",
     ProposalController.getOccupationRate
   )
+  .get(
+    "/waiver_premium/:age/:table_id/:premium",
+    ProposalController.getWaiverPremiumController
+  )
 
   .get(
     "/hospital-prem/:table_id/:occup_code/:gender/:sum_assured/:last_education/:last_education_document/:instmode",
     ProposalController.getHospitalPremRate
+  )
+  .get(
+    "/mdr-prem/:table_id/:term/:dob/:com_date/:sumAssurance/:instmode/:prem",
+    ProposalController.getMdrPremiumController
+  )
+  .get(
+    "/mdr-rate/:table_id/:term/:dob/:com_date/:sumAssurance/:instmode/:rate",
+    ProposalController.getMdrRateController
   )
 
   .get(
