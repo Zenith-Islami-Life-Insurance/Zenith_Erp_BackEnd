@@ -2057,9 +2057,52 @@ const proposal = {
       }
     }
   },
+  //get plan name for Ipd Rider
+  getPlanDetails: async (riskAdate, txtSumInsured, callback) => {
+    let con;
+    try {
+      con = await oracledb.getConnection({
+        user: "MENU",
+        password: "mayin",
+        connectString: "192.168.3.11/system",
+      });
+      const result = await con.execute(
+        `SELECT DISTINCT PLAN_NAME, PLAN_NO, YLY_MAX_BENEFIT, 
+               TO_DATE(:RISKADATE, 'YYYYMMDD') AS START_FROM, 
+               ADD_MONTHS(TO_DATE(:RISKADATE, 'YYYYMMDD'), 12) AS END_TO
+        FROM (
+          SELECT PLAN_NAME, YLY_MAX_BENEFIT, PLAN_NO 
+          FROM policy_management.IPD_PLAN 
+          WHERE PLAN_NO = 1
+          UNION ALL
+          SELECT PLAN_NAME, YLY_MAX_BENEFIT, PLAN_NO 
+          FROM policy_management.IPD_PLAN 
+          WHERE NVL(YLY_MAX_BENEFIT, 0) <= NVL(:TXT_SUM_INSURED, 0)
+        )
+        ORDER BY PLAN_NO`,
+        {
+          RISKADATE: riskAdate,
+          TXT_SUM_INSURED: txtSumInsured,
+        }
+      );
 
+      console.log("SQL Result: ", result);
 
-
+      const data = result.rows || [];
+      callback(null, data);
+    } catch (err) {
+      console.error("SQL Execution Error: ", err);
+      callback(err, null);
+    } finally {
+      if (con) {
+        try {
+          await con.close();
+        } catch (err) {
+          console.error("Error closing connection: ", err);
+        }
+      }
+    }
+  },
 
 };
 module.exports = proposal;

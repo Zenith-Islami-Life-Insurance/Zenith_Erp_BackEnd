@@ -1263,9 +1263,6 @@ exports.getMdrPremiumController = (req, res) => {
 // get MDR Rate data
 exports.getMdrRateController = (req, res) => {
   const { table_id, term, dob, com_date, sumAssurance, instmode, rate } = req.params;
-
-  console.log("Received Parameters: ", req.params);
-
   ProposalModule.getMdrRate(
     table_id,
     term,
@@ -1291,6 +1288,38 @@ exports.getMdrRateController = (req, res) => {
     }
   );
 };
+
+//get plan name for Ipd Rider
+exports.getPlanDetailsController = (req, res) => {
+  const { riskAdate, txtSumInsured } = req.params;
+  console.log(riskAdate, txtSumInsured)
+  console.log("Received Parameters: ", req.params);
+
+  ProposalModule.getPlanDetails(
+    riskAdate,
+    txtSumInsured,
+    (err, datas) => {
+      if (err) {
+        return res.status(500).json({ error: "Failed to retrieve plan details" });
+      }
+
+      if (!datas || datas.length === 0) {
+        return res.status(404).json({ message: "No data found" });
+      }
+
+      const formattedData = datas.map((row) => ({
+        plan_name: row[0],
+        plan_no: row[1],
+        yly_max_benefit: row[2],
+        start_from: row[3],
+        end_to: row[4],
+      }));
+
+      res.json(formattedData);
+    }
+  );
+};
+
 
 
 

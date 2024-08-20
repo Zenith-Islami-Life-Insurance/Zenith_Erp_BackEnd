@@ -117,6 +117,11 @@ router
   .get(
     "/ipd-prem-rate/:plan_no/:dob/:risk_rate/:instmode/:table_id",
     ProposalController.getIpdPremrate
+  )
+
+  .get(
+    "/ipd-plan/:riskAdate/:txtSumInsured",
+    ProposalController.getPlanDetailsController
   );
 
 module.exports = router;
