@@ -2103,6 +2103,108 @@ const proposal = {
       }
     }
   },
+  //get Medical Status
+  // getMedicalStatus: async (proposalNo, callback) => {
+  //   let con;
+  //   try {
+  //     con = await oracledb.getConnection({
+  //       user: "MENU",
+  //       password: "mayin",
+  //       connectString: "192.168.3.11/system",
+  //     });
+  //     const result = await con.execute(
+  //       `SELECT POLICY_MANAGEMENT.MEDICAL_STATUS(:proposalNo) XX FROM SYS.DUAL`,
+  //       {
+  //         proposalNo: proposalNo,
+  //       }
+  //     );
+
+  //     const data = result.rows || [];
+  //     callback(null, data);
+  //   } catch (err) {
+  //     console.error("SQL Execution Error: ", err);
+  //     callback(err, null);
+  //   } finally {
+  //     if (con) {
+  //       try {
+  //         await con.close();
+  //       } catch (err) {
+  //         console.error("Error closing connection: ", err);
+  //       }
+  //     }
+  //   }
+  // },
+  getMedicalStatus: async (proposalNo, callback) => {
+    let con;
+    try {
+      con = await oracledb.getConnection({
+        user: "MENU",
+        password: "mayin",
+        connectString: "192.168.3.11/system",
+      });
+      const result = await con.execute(
+        `SELECT POLICY_MANAGEMENT.MEDICAL_STATUS(:proposalNo) AS XX FROM SYS.DUAL`,
+        {
+          proposalNo: { val: proposalNo, dir: oracledb.BIND_IN, type: oracledb.STRING }, // Explicitly specify the binding type
+        }
+      );
+
+      // Extract the result, handling different scenarios
+      const data = result.rows.length > 0 ? result.rows[0][0] : null;
+      callback(null, data);
+    } catch (err) {
+      console.error("SQL Execution Error: ", err);
+      callback(err, null);
+    } finally {
+      if (con) {
+        try {
+          await con.close();
+        } catch (err) {
+          console.error("Error closing connection: ", err);
+        }
+      }
+    }
+  },
+  //Get maturity date
+  getMaturityDate: async (com_date, term, callback) => {
+    let con;
+    try {
+      con = await oracledb.getConnection({
+        user: "MENU",
+        password: "mayin",
+        connectString: "192.168.3.11/system",
+      });
+
+      // Updated query to properly call a function or procedure and handle parameters
+      const result = await con.execute(
+        `SELECT POLICY_MANAGEMENT.MATURITY_DATE(
+          TO_DATE(:com_date, 'YYYYMMDD'),
+          :term
+        ) AS maturity_date FROM DUAL`,
+        {
+          com_date: com_date,
+          term: term,
+        }
+      );
+
+      console.log("SQL Result: ", result);
+
+      const data = result.rows || [];
+      callback(null, data);
+    } catch (err) {
+      console.error("SQL Execution Error: ", err);
+      callback(err, null);
+    } finally {
+      if (con) {
+        try {
+          await con.close();
+        } catch (err) {
+          console.error("Error closing connection: ", err);
+        }
+      }
+    }
+  },
+
 
 };
 module.exports = proposal;

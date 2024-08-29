@@ -1320,6 +1320,65 @@ exports.getPlanDetailsController = (req, res) => {
   );
 };
 
+//get medical information
+exports.getMedicalStatus = (req, res) => {
+  const { proposalNo } = req.params; // Extracting the proposal number from the request parameters
+  console.log("Received Proposal No: ", proposalNo);
+
+  // Calling the getMedicalStatus method in the ProposalModule
+  ProposalModule.getMedicalStatus(proposalNo, (err, data) => {
+    if (err) {
+      // If an error occurs, send a 500 response with an error message
+      return res.status(500).json({ error: "Failed to retrieve medical status" });
+    }
+
+    if (!data || (Array.isArray(data) && data.length === 0)) {
+      // If no data is found, or data is an empty array, send a 404 response
+      return res.status(404).json({ message: "No medical status found" });
+    }
+
+    // Check if the data is an array before mapping
+    let formattedData;
+    if (Array.isArray(data)) {
+      formattedData = data.map((row) => ({
+        medical_status: row[0], // Adjust the indices according to your data structure
+        additional_info: row[1], // Example: If your query returns multiple columns, map them accordingly
+      }));
+    } else {
+      // Handle the case where the data is a single value
+      formattedData = {
+        medical_status: data, // If it's a single value, format it accordingly
+      };
+    }
+
+    // Send the formatted data as a JSON response
+    res.json(formattedData);
+  });
+};
+
+//Matrurity Date 
+exports.getMaturityDate = (req, res) => {
+  const { com_date, term } = req.params;
+
+  ProposalModule.getMaturityDate(com_date, term, (err, datas) => {
+    if (err) {
+      return res.status(500).json({ error: "Failed to get maturity date" });
+    }
+
+    if (!datas || datas.length === 0) {
+      return res.status(404).json({ message: "No data found" });
+    }
+
+    // Assuming that datas[0][0] holds the maturity date value
+    const maturityDate = datas[0][0];
+
+    res.json({ maturity_date: maturityDate });
+  });
+};
+
+
+
+
 
 
 

@@ -122,6 +122,14 @@ router
   .get(
     "/ipd-plan/:riskAdate/:txtSumInsured",
     ProposalController.getPlanDetailsController
+  )
+  .get(
+    "/medical-status/:proposalNo",
+    ProposalController.getMedicalStatus
+  )
+  .get(
+    "/maturity-date/:com_date/:term",
+    ProposalController.getMaturityDate
   );
 
 module.exports = router;
