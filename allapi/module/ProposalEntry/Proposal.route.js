@@ -130,6 +130,22 @@ router
   .get(
     "/maturity-date/:com_date/:term",
     ProposalController.getMaturityDate
+  )
+  .get(
+    "/option/:table_id",
+    ProposalController.getOption
+  )
+  .post(
+    "/ipdRider",
+    ProposalController.InsertPremInfoController
+  )
+  .delete(
+    "/ipdRider/delete/:proposalNumber",
+    ProposalController.deletePremInfoController
+  )
+  .put(
+    "/update-proposal-dummy/:proposalNumber",
+    ProposalController.UpdateProposalDummyController
   );
 
 module.exports = router;

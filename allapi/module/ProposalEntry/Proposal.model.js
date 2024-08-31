@@ -1790,7 +1790,7 @@ const proposal = {
         password: "mayin",
         connectString: "192.168.3.11/system",
       });
-      // "SELECT POLICY_MANAGEMENT.OCCUP_EXTRA_NEW (:table_id,:occup_code,:gender,:sum_assured,:last_education,:last_education_document,NVL(:instmode,'1')) FROM SYS.DUAL",
+
       const result = await con.execute(
         "SELECT POLICY_MANAGEMENT.LOADING_VAL_NEW(:table_id,:occup_code,:gender,:sum_assured,:last_education,:last_education_document,:instmode) FROM SYS.DUAL",
         {
@@ -2104,36 +2104,7 @@ const proposal = {
     }
   },
   //get Medical Status
-  // getMedicalStatus: async (proposalNo, callback) => {
-  //   let con;
-  //   try {
-  //     con = await oracledb.getConnection({
-  //       user: "MENU",
-  //       password: "mayin",
-  //       connectString: "192.168.3.11/system",
-  //     });
-  //     const result = await con.execute(
-  //       `SELECT POLICY_MANAGEMENT.MEDICAL_STATUS(:proposalNo) XX FROM SYS.DUAL`,
-  //       {
-  //         proposalNo: proposalNo,
-  //       }
-  //     );
 
-  //     const data = result.rows || [];
-  //     callback(null, data);
-  //   } catch (err) {
-  //     console.error("SQL Execution Error: ", err);
-  //     callback(err, null);
-  //   } finally {
-  //     if (con) {
-  //       try {
-  //         await con.close();
-  //       } catch (err) {
-  //         console.error("Error closing connection: ", err);
-  //       }
-  //     }
-  //   }
-  // },
   getMedicalStatus: async (proposalNo, callback) => {
     let con;
     try {
@@ -2205,6 +2176,177 @@ const proposal = {
     }
   },
 
+  // get option name for plan:22,23
+  getOption: async (table_id, callback) => {
+    let con;
+    try {
+      con = await oracledb.getConnection({
+        user: "MENU",
+        password: "mayin",
+        connectString: "192.168.3.11/system",
+      });
+
+      const result = await con.execute(
+        `SELECT DISTINCT OPTION_N,
+                DECODE(OPTION_N, 
+                       'A', 'A: Pension, Maturity and Death Claim',
+                       'B', 'B: Pension, Maturity and Death Claim (optional)')
+                DESCRIPTION 
+         FROM POLICY_MANAGEMENT.PLAN_22_23_RATE 
+         WHERE TABLE_ID = :table_id 
+         ORDER BY OPTION_N`,
+        {
+          table_id: { val: table_id }  // Proper binding
+        }
+      );
+
+      const data = result.rows;
+      callback(null, data);
+    } catch (err) {
+      console.error(err);
+      callback(err, null);
+    } finally {
+      if (con) {
+        try {
+          await con.close();
+        } catch (err) {
+          console.error(err);
+        }
+      }
+    }
+  },
+
+  // insert into ipd rider
+  insertPremInfo: async (premInfo) => {
+    let con;
+    try {
+      con = await oracledb.getConnection({
+        user: "MENU",
+        password: "mayin",
+        connectString: "192.168.3.11/system",
+      });
+
+      const insertPromises = premInfo.map(async (info) => {
+        return con.execute(
+          `INSERT INTO policy_management.IPD_PREM_INFO(
+            REFNO, PLAN_NO, AGE, PREM_RATE, DOB, CURRENT_AGE, START_FROM, END_AT)
+            VALUES(:PROPOSAL_N, :PLAN_NO, :AGE, :PREM_RATE, 
+                   TO_DATE(:DOB, 'MM/DD/YYYY'), :CURRENT_AGE, 
+                   TO_DATE(:START_FROM, 'MM/DD/YYYY'), 
+                   TO_DATE(:END_AT, 'MM/DD/YYYY'))`,
+          {
+            PROPOSAL_N: info.PROPOSAL_N,
+            PLAN_NO: info.PLAN_NO,
+            AGE: info.AGE,
+            PREM_RATE: info.PREM_RATE,
+            DOB: info.DOB, // Pass the date as a string (e.g., "5/17/1996")
+            CURRENT_AGE: info.CURRENT_AGE,
+            START_FROM: info.START_FROM, // e.g., "5/17/2024"
+            END_AT: info.END_AT, // e.g., "5/17/2034"
+          },
+          { autoCommit: true }
+        );
+      });
+
+      const results = await Promise.all(insertPromises);
+      return results; // Return the results
+    } catch (err) {
+      console.error(err);
+      throw err; // Re-throw the error so it can be caught in the controller
+    } finally {
+      if (con) {
+        try {
+          await con.close();
+        } catch (err) {
+          console.error(err);
+        }
+      }
+    }
+  },
+
+  //Delete from ipd
+  deletePremInfo: async (proposalNumber) => {
+    let con;
+    try {
+      con = await oracledb.getConnection({
+        user: "MENU",
+        password: "mayin",
+        connectString: "192.168.3.11/system",
+      });
+
+      const result = await con.execute(
+        `DELETE FROM policy_management.IPD_PREM_INFO WHERE REFNO = :PROPOSAL_N`,
+        {
+          PROPOSAL_N: proposalNumber,
+        },
+        { autoCommit: true }
+      );
+
+      return result;
+    } catch (err) {
+      console.error(err);
+      throw err;
+    } finally {
+      if (con) {
+        try {
+          await con.close();
+        } catch (err) {
+          console.error(err);
+        }
+      }
+    }
+  },
+
+  updateProposalDummy: async (updateData, proposalNumber) => {
+    let connection;
+
+    try {
+      connection = await oracledb.getConnection(config);
+
+      // Convert date fields to Oracle's TO_DATE format if necessary
+      const setClause = Object.keys(updateData)
+        .map((key) => {
+          if (key === 'JDOB' || key === 'START_FROM' || key === 'END_AT') {
+            // Ensure date fields are formatted using TO_DATE
+            return `${key} = TO_DATE(:${key}, 'MM/DD/YYYY')`;
+          } else {
+            return `${key} = :${key}`;
+          }
+        })
+        .join(', ');
+
+      const sql = `UPDATE POLICY_MANAGEMENT.PROPOSAL_DUMMY SET ${setClause} WHERE PROPOSAL_N = :proposal_number`;
+      const binds = { ...updateData, proposal_number: proposalNumber };
+
+      console.log('Executing SQL:', sql, 'with binds:', binds);  // Debugging statement
+      await connection.execute(sql, binds);
+
+      // Commit the transaction
+      await connection.commit();
+
+      return true;
+
+    } catch (err) {
+      if (connection) {
+        try {
+          // Rollback the transaction if there is an error
+          await connection.execute('ROLLBACK');
+        } catch (rollbackErr) {
+          console.error('Error during rollback:', rollbackErr);
+        }
+      }
+      console.error('Error updating the table:', err);
+      throw err;
+    } finally {
+      if (connection) {
+        try {
+          await connection.close();
+        } catch (err) {
+          console.error('Error closing the connection:', err);
+        }
+      }
+    }
+  },
 
 };
 module.exports = proposal;

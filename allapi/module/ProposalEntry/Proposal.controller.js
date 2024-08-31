@@ -1323,7 +1323,6 @@ exports.getPlanDetailsController = (req, res) => {
 //get medical information
 exports.getMedicalStatus = (req, res) => {
   const { proposalNo } = req.params; // Extracting the proposal number from the request parameters
-  console.log("Received Proposal No: ", proposalNo);
 
   // Calling the getMedicalStatus method in the ProposalModule
   ProposalModule.getMedicalStatus(proposalNo, (err, data) => {
@@ -1375,6 +1374,83 @@ exports.getMaturityDate = (req, res) => {
     res.json({ maturity_date: maturityDate });
   });
 };
+//get waiver premium
+exports.getOption = (req, res) => {
+  const { table_id } = req.params;
+
+  ProposalModule.getOption(table_id, (err, items) => {
+    if (err) {
+      return res.status(500).json({ error: "Failed to get options" });
+    }
+
+    // Map the dept_head data to the desired format
+    const formattedData = items.map((row) => ({
+      options: row[0],
+      description: row[1],
+    }));
+
+    res.json(formattedData);
+  });
+};
+
+// insert into ipd
+exports.InsertPremInfoController = async (req, res) => {
+  try {
+    const premInfoData = req.body;
+    const results = await ProposalModule.insertPremInfo(
+      Array.isArray(premInfoData) ? premInfoData : [premInfoData]
+    );
+
+    console.log(results);
+    res.status(201).json("Premium Info Entry Successfully Inserted");
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ success: false, error: "Internal Server Error" });
+  }
+};
+//Delete from ipd
+exports.deletePremInfoController = async (req, res) => {
+  try {
+    const { proposalNumber } = req.params;
+
+    const result = await ProposalModule.deletePremInfo(proposalNumber);
+
+    if (result.rowsAffected === 0) {
+      return res.status(404).json({ success: false, message: "No record found to delete" });
+    }
+
+    res.status(200).json({ success: true, message: "Premium info deleted successfully" });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ success: false, error: "Internal Server Error" });
+  }
+};
+
+exports.UpdateProposalDummyController = async (req, res) => {
+  try {
+    const { proposalNumber } = req.params;
+    const updateData = req.body;
+
+    // Ensure all required fields are present
+    if (!updateData || !proposalNumber) {
+      return res.status(400).json({ success: false, message: "Missing required fields" });
+    }
+
+    const result = await ProposalModule.updateProposalDummy(updateData, proposalNumber);
+
+    if (result) {
+      res.status(200).json({ success: true, message: "Proposal Dummy updated successfully" });
+    } else {
+      res.status(500).json({ success: false, message: "Failed to update Proposal Dummy" });
+    }
+  } catch (err) {
+    console.error('Error in UpdateProposalDummyController:', err);
+    res.status(500).json({ success: false, error: "Internal Server Error" });
+  }
+};
+
+
+
 
 
 
