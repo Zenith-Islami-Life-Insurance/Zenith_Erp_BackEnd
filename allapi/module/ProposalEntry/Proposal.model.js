@@ -6,6 +6,18 @@ const config = {
   password: 'mayin',
   connectString: '192.168.3.11/system'  // replace with your actual connection string
 };
+function convertDateToMMDDYYYY(dateString) {
+  if (typeof dateString !== 'string' || dateString.length !== 8) {
+    throw new Error('Invalid date format');
+  }
+
+  const year = dateString.substring(0, 4);
+  const month = dateString.substring(4, 6);
+  const day = dateString.substring(6, 8);
+
+  return `${month}/${day}/${year}`;
+}
+
 const proposal = {
   //PROPOSAL-1 PAGE
   InsertProposalData: async (proposals) => {
@@ -53,27 +65,34 @@ const proposal = {
           MARRIAGE_DATE,
         } = proposal;
 
+        // Safeguard against undefined date strings
+        const formattedProposalDate = PROPOSAL_D ? convertDateToMMDDYYYY(PROPOSAL_D) : null;
+        const formattedRiskDate = RISKDATE ? convertDateToMMDDYYYY(RISKDATE) : null;
+        const formattedDOB = DOB ? convertDateToMMDDYYYY(DOB) : null;
+        const formattedMarriageDate = MARRIAGE_DATE ? convertDateToMMDDYYYY(MARRIAGE_DATE) : null;
+
         const result = await con.execute(
           `INSERT INTO POLICY_MANAGEMENT.PROPOSAL_DUMMY(
             PROPOSAL_N, POL_ENTRY_STATUS, PROPOSAL_D, RISKDATE, PROPOSER, 
             FATHERS_NAME, FATHERHUSB, MOTHERS_NAME, ADDRESS1, POST_CODE_CUR, 
             POST_CODE_PER, CITY, MOBILE, LOCALITY, N_ID_NUMBER, DOB, AGE, SEX, 
             OCCUPATION, AGENT_ID, BRANCH_ID, USERID, LAST_EDUCATION, 
-            LAST_EDU_DOCUMENT, RELIGION, MARITAL_STATUS, LOCALITY_COUNTRY, SPOUSE, PD_CODE,MARRIAGE_DATE
+            LAST_EDU_DOCUMENT, RELIGION, MARITAL_STATUS, LOCALITY_COUNTRY, SPOUSE, PD_CODE, MARRIAGE_DATE
           ) 
           VALUES(
-            :PROPOSAL_N, :POL_ENTRY_STATUS, TO_DATE(:PROPOSAL_D,'YYYYMMDD'), 
-            TO_DATE(:RISKDATE,'YYYYMMDD'), :PROPOSER, :FATHERS_NAME, :FATHERHUSB, 
+            :PROPOSAL_N, :POL_ENTRY_STATUS, TO_DATE(:PROPOSAL_D, 'MM/DD/YYYY'), 
+            TO_DATE(:RISKDATE, 'MM/DD/YYYY'), :PROPOSER, :FATHERS_NAME, :FATHERHUSB, 
             :MOTHERS_NAME, :ADDRESS1, :POST_CODE_CUR, :POST_CODE_PER, :CITY, 
-            :MOBILE, :LOCALITY, :N_ID_NUMBER, TO_DATE(:DOB,'YYYYMMDD'), :AGE, 
+            :MOBILE, :LOCALITY, :N_ID_NUMBER, TO_DATE(:DOB, 'MM/DD/YYYY'), :AGE, 
             :SEX, :OCCUPATION, :AGENT_ID, :BRANCH_ID, :USERID, :LAST_EDUCATION, 
-            :LAST_EDU_DOCUMENT, :RELIGION, :MARITAL_STATUS, :LOCALITY_COUNTRY, :SPOUSE, :PD_CODE,:MARRIAGE_DATE
+            :LAST_EDU_DOCUMENT, :RELIGION, :MARITAL_STATUS, :LOCALITY_COUNTRY, :SPOUSE, :PD_CODE,
+            TO_DATE(:MARRIAGE_DATE, 'MM/DD/YYYY')
           )`,
           {
             PROPOSAL_N,
             POL_ENTRY_STATUS,
-            PROPOSAL_D,
-            RISKDATE,
+            PROPOSAL_D: formattedProposalDate,
+            RISKDATE: formattedRiskDate,
             PROPOSER,
             FATHERS_NAME,
             FATHERHUSB,
@@ -85,7 +104,7 @@ const proposal = {
             MOBILE,
             LOCALITY,
             N_ID_NUMBER,
-            DOB,
+            DOB: formattedDOB,
             AGE,
             SEX,
             OCCUPATION,
@@ -99,7 +118,7 @@ const proposal = {
             LOCALITY_COUNTRY,
             SPOUSE,
             PD_CODE,
-            MARRIAGE_DATE,
+            MARRIAGE_DATE: formattedMarriageDate,
           },
           { autoCommit: true }
         );
@@ -121,6 +140,7 @@ const proposal = {
       }
     }
   },
+
   InsertProposalAddress: async (proposals) => {
     let con;
 
@@ -2226,16 +2246,17 @@ const proposal = {
         connectString: "192.168.3.11/system",
       });
 
+      // Create a transaction to insert all records
       const insertPromises = premInfo.map(async (info) => {
         return con.execute(
           `INSERT INTO policy_management.IPD_PREM_INFO(
             REFNO, PLAN_NO, AGE, PREM_RATE, DOB, CURRENT_AGE, START_FROM, END_AT)
-            VALUES(:PROPOSAL_N, :PLAN_NO, :AGE, :PREM_RATE, 
+            VALUES(:REFNO, :PLAN_NO, :AGE, :PREM_RATE, 
                    TO_DATE(:DOB, 'MM/DD/YYYY'), :CURRENT_AGE, 
                    TO_DATE(:START_FROM, 'MM/DD/YYYY'), 
                    TO_DATE(:END_AT, 'MM/DD/YYYY'))`,
           {
-            PROPOSAL_N: info.PROPOSAL_N,
+            REFNO: info.REFNO,
             PLAN_NO: info.PLAN_NO,
             AGE: info.AGE,
             PREM_RATE: info.PREM_RATE,
@@ -2244,25 +2265,27 @@ const proposal = {
             START_FROM: info.START_FROM, // e.g., "5/17/2024"
             END_AT: info.END_AT, // e.g., "5/17/2034"
           },
-          { autoCommit: true }
+          { autoCommit: false } // Set autoCommit to false
         );
       });
 
       const results = await Promise.all(insertPromises);
+      await con.commit(); // Explicitly commit the transaction
       return results; // Return the results
     } catch (err) {
-      console.error(err);
+      console.error('Error inserting premium info:', err);
       throw err; // Re-throw the error so it can be caught in the controller
     } finally {
       if (con) {
         try {
           await con.close();
         } catch (err) {
-          console.error(err);
+          console.error('Error closing connection:', err);
         }
       }
     }
   },
+
 
   //Delete from ipd
   deletePremInfo: async (proposalNumber) => {
@@ -2303,11 +2326,34 @@ const proposal = {
     try {
       connection = await oracledb.getConnection(config);
 
+      // Decode the proposalNumber (in case it's URL encoded)
+      const decodedProposalNumber = decodeURIComponent(proposalNumber);
+
+      // Filter out empty/null fields from the updateData object
+      const filteredData = Object.fromEntries(
+        Object.entries(updateData).filter(
+          ([key, value]) => value !== null && value !== undefined && value !== ''
+        )
+      );
+
+      // Ensure date fields are in the correct format
+      ['JDOB', 'START_FROM', 'END_AT', 'MATURITY'].forEach((dateField) => {
+        if (filteredData[dateField]) {
+          try {
+            const date = new Date(filteredData[dateField]);
+            if (isNaN(date.getTime())) throw new Error(`Invalid date: ${filteredData[dateField]}`);
+            // Format to MM/DD/YYYY
+            filteredData[dateField] = `${date.getMonth() + 1}/${date.getDate()}/${date.getFullYear()}`;
+          } catch (e) {
+            throw new Error(`Date formatting error for ${dateField}: ${e.message}`);
+          }
+        }
+      });
+
       // Convert date fields to Oracle's TO_DATE format if necessary
-      const setClause = Object.keys(updateData)
+      const setClause = Object.keys(filteredData)
         .map((key) => {
-          if (key === 'JDOB' || key === 'START_FROM' || key === 'END_AT') {
-            // Ensure date fields are formatted using TO_DATE
+          if (['JDOB', 'START_FROM', 'END_AT', 'MATURITY'].includes(key)) {
             return `${key} = TO_DATE(:${key}, 'MM/DD/YYYY')`;
           } else {
             return `${key} = :${key}`;
@@ -2315,11 +2361,31 @@ const proposal = {
         })
         .join(', ');
 
-      const sql = `UPDATE POLICY_MANAGEMENT.PROPOSAL_DUMMY SET ${setClause} WHERE PROPOSAL_N = :proposal_number`;
-      const binds = { ...updateData, proposal_number: proposalNumber };
+      // If there's nothing to update, return early
+      if (!setClause) {
+        console.log('No fields to update.');
+        return false;
+      }
 
-      console.log('Executing SQL:', sql, 'with binds:', binds);  // Debugging statement
-      await connection.execute(sql, binds);
+      // Use the dynamic proposalNumber
+      const sql = `UPDATE POLICY_MANAGEMENT.PROPOSAL_DUMMY 
+                   SET ${setClause} 
+                   WHERE PROPOSAL_N = :proposal_number`;
+
+      // Bind parameters for the query
+      const binds = { ...filteredData, proposal_number: decodedProposalNumber };
+
+      console.log('Executing SQL:', sql);  // Debugging statement
+      console.log('With binds:', binds);  // Debugging statement
+
+      // Execute the SQL statement
+      const result = await connection.execute(sql, binds);
+      console.log('Rows affected:', result.rowsAffected); // Log rows affected
+
+      // If no rows were affected, log a message
+      if (result.rowsAffected === 0) {
+        console.log('No rows were updated. Check if PROPOSAL_N exists.');
+      }
 
       // Commit the transaction
       await connection.commit();
@@ -2347,6 +2413,8 @@ const proposal = {
       }
     }
   },
+
+
 
 };
 module.exports = proposal;

@@ -1395,6 +1395,7 @@ exports.getOption = (req, res) => {
 
 // insert into ipd
 exports.InsertPremInfoController = async (req, res) => {
+  console.log('Received data:', req.body)
   try {
     const premInfoData = req.body;
     const results = await ProposalModule.insertPremInfo(
@@ -1402,7 +1403,7 @@ exports.InsertPremInfoController = async (req, res) => {
     );
 
     console.log(results);
-    res.status(201).json("Premium Info Entry Successfully Inserted");
+    res.status(201).json("Premium Info Entry Successfully Insertedd");
   } catch (err) {
     console.error(err);
     res.status(500).json({ success: false, error: "Internal Server Error" });
@@ -1431,7 +1432,6 @@ exports.UpdateProposalDummyController = async (req, res) => {
     const { proposalNumber } = req.params;
     const updateData = req.body;
 
-    // Ensure all required fields are present
     if (!updateData || !proposalNumber) {
       return res.status(400).json({ success: false, message: "Missing required fields" });
     }
@@ -1448,6 +1448,7 @@ exports.UpdateProposalDummyController = async (req, res) => {
     res.status(500).json({ success: false, error: "Internal Server Error" });
   }
 };
+
 
 
 
