@@ -6,13 +6,19 @@ exports.InsertProposalDataController = async (req, res) => {
     const results = await ProposalModule.InsertProposalData(
       Array.isArray(proposals) ? proposals : [proposals]
     );
-    console.log(results)
-    res.status(201).json("Proposal Entry Successfully");
+
+    // Assuming you are dealing with one proposal at a time
+    const proposalNumber = results[0]?.proposalNumber;
+    res.status(201).json({
+      message: "Proposal Entry Successfully",
+      proposalNumber
+    });
   } catch (err) {
     console.error(err);
     res.status(500).json({ success: false, error: "Internal Server Error" });
   }
 };
+
 exports.InsertProposalAddressDataController = async (req, res) => {
   try {
     const proposals = req.body;
@@ -410,6 +416,12 @@ exports.getProposalInformation = (req, res) => {
         poliy_type: proposal[31],
         last_edu_doc: proposal[32],
         marrige_date: proposal[33],
+        spouse: proposal[34],
+        edu: proposal[35],
+        sPrem: proposal[36],
+        suppliment_rate: proposal[37],
+        premiumWaiver: proposal[38]
+
       };
     });
 
@@ -561,6 +573,7 @@ exports.getPostofficeList = (req, res) => {
 exports.getCommencementDate = (req, res) => {
   const com_date = req.params.com_date;
   const policy_type = req.params.policy_type;
+  console.log(com_date, policy_type)
 
   ProposalModule.getCommencementDate(
     com_date,

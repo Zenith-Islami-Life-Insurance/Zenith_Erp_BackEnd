@@ -65,32 +65,33 @@ const proposal = {
           MARRIAGE_DATE,
         } = proposal;
 
-        // Safeguard against undefined date strings
+        // Safeguard against undefined date strings and convert them
         const formattedProposalDate = PROPOSAL_D ? convertDateToMMDDYYYY(PROPOSAL_D) : null;
         const formattedRiskDate = RISKDATE ? convertDateToMMDDYYYY(RISKDATE) : null;
         const formattedDOB = DOB ? convertDateToMMDDYYYY(DOB) : null;
         const formattedMarriageDate = MARRIAGE_DATE ? convertDateToMMDDYYYY(MARRIAGE_DATE) : null;
 
+        // Double-check all bind variables are defined and passed correctly
         const result = await con.execute(
           `INSERT INTO POLICY_MANAGEMENT.PROPOSAL_DUMMY(
-            PROPOSAL_N, POL_ENTRY_STATUS, PROPOSAL_D, RISKDATE, PROPOSER, 
-            FATHERS_NAME, FATHERHUSB, MOTHERS_NAME, ADDRESS1, POST_CODE_CUR, 
-            POST_CODE_PER, CITY, MOBILE, LOCALITY, N_ID_NUMBER, DOB, AGE, SEX, 
-            OCCUPATION, AGENT_ID, BRANCH_ID, USERID, LAST_EDUCATION, 
-            LAST_EDU_DOCUMENT, RELIGION, MARITAL_STATUS, LOCALITY_COUNTRY, SPOUSE, PD_CODE, MARRIAGE_DATE
-          ) 
-          VALUES(
-            :PROPOSAL_N, :POL_ENTRY_STATUS, TO_DATE(:PROPOSAL_D, 'MM/DD/YYYY'), 
-            TO_DATE(:RISKDATE, 'MM/DD/YYYY'), :PROPOSER, :FATHERS_NAME, :FATHERHUSB, 
-            :MOTHERS_NAME, :ADDRESS1, :POST_CODE_CUR, :POST_CODE_PER, :CITY, 
-            :MOBILE, :LOCALITY, :N_ID_NUMBER, TO_DATE(:DOB, 'MM/DD/YYYY'), :AGE, 
-            :SEX, :OCCUPATION, :AGENT_ID, :BRANCH_ID, :USERID, :LAST_EDUCATION, 
-            :LAST_EDU_DOCUMENT, :RELIGION, :MARITAL_STATUS, :LOCALITY_COUNTRY, :SPOUSE, :PD_CODE,
-            TO_DATE(:MARRIAGE_DATE, 'MM/DD/YYYY')
-          )`,
+                    PROPOSAL_N, POL_ENTRY_STATUS, PROPOSAL_D, RISKDATE, PROPOSER, 
+                    FATHERS_NAME, FATHERHUSB, MOTHERS_NAME, ADDRESS1, POST_CODE_CUR, 
+                    POST_CODE_PER, CITY, MOBILE, LOCALITY, N_ID_NUMBER, DOB, AGE, SEX, 
+                    OCCUPATION, AGENT_ID, BRANCH_ID, USERID, LAST_EDUCATION, 
+                    LAST_EDU_DOCUMENT, RELIGION, MARITAL_STATUS, LOCALITY_COUNTRY, SPOUSE, PD_CODE, MARRIAGE_DATE
+                ) 
+                VALUES(
+                    :PROPOSAL_N, :POL_ENTRY_STATUS, TO_DATE(:PROPOSAL_D, 'MM/DD/YYYY'), 
+                    TO_DATE(:RISKDATE, 'MM/DD/YYYY'), :PROPOSER, :FATHERS_NAME, :FATHERHUSB, 
+                    :MOTHERS_NAME, :ADDRESS1, :POST_CODE_CUR, :POST_CODE_PER, :CITY, 
+                    :MOBILE, :LOCALITY, :N_ID_NUMBER, TO_DATE(:DOB, 'MM/DD/YYYY'), :AGE, 
+                    :SEX, :OCCUPATION, :AGENT_ID, :BRANCH_ID, :USERID, :LAST_EDUCATION, 
+                    :LAST_EDU_DOCUMENT, :RELIGION, :MARITAL_STATUS, :LOCALITY_COUNTRY, :SPOUSE, :PD_CODE,
+                    TO_DATE(:MARRIAGE_DATE, 'MM/DD/YYYY')
+                )`,
           {
-            PROPOSAL_N,
-            POL_ENTRY_STATUS,
+            PROPOSAL_N,           // Ensure this value is not undefined
+            POL_ENTRY_STATUS,      // Check that all these fields exist and are properly bound
             PROPOSAL_D: formattedProposalDate,
             RISKDATE: formattedRiskDate,
             PROPOSER,
@@ -123,7 +124,7 @@ const proposal = {
           { autoCommit: true }
         );
 
-        results.push(result.outBinds);
+        results.push({ proposalNumber: PROPOSAL_N });
       }
 
       return results;
@@ -140,6 +141,8 @@ const proposal = {
       }
     }
   },
+
+
 
   InsertProposalAddress: async (proposals) => {
     let con;
@@ -850,7 +853,7 @@ const proposal = {
       });
 
       const result = await con.execute(
-        "SELECT PROPOSAL_N,PROPOSAL_D,RISKDATE,TABLE_ID,TERM,SUM_INSURE,PREMIUM,SUMATRISK,PROPOSER,SALUTE,ADDRESS1,ADDRESS2,CITY,ZIP,MOBILE,DOB,AGE,AGE_P_CODE,FATHERHUSB,SEX,OCCUPATION,INSTMODE,TOTALINST,INSTNO,AGENT_ID,PD_CODE,MOTHERS_NAME,FATHERS_NAME,MARITAL_STATUS,N_ID_NUMBER,PLAN_DESCRIPTION, POL_ENTRY_STATUS,LAST_EDU_DOCUMENT,MARRIAGE_DATE FROM POLICY_MANAGEMENT.PROPOSAL_DUMMY WHERE PROPOSAL_N=:proposal_no",
+        "SELECT PROPOSAL_N,PROPOSAL_D,RISKDATE,TABLE_ID,TERM,SUM_INSURE,PREMIUM,SUMATRISK,PROPOSER,SALUTE,ADDRESS1,ADDRESS2,CITY,ZIP,MOBILE,DOB,AGE,AGE_P_CODE,FATHERHUSB,SEX,OCCUPATION,INSTMODE,TOTALINST,INSTNO,AGENT_ID,PD_CODE,MOTHERS_NAME,FATHERS_NAME,MARITAL_STATUS,N_ID_NUMBER,PLAN_DESCRIPTION, POL_ENTRY_STATUS,LAST_EDU_DOCUMENT,MARRIAGE_DATE,SPOUSE,LAST_EDUCATION,ACCPREM,ACCRATE,WAIVER_OF_PREMIUM FROM POLICY_MANAGEMENT.PROPOSAL_DUMMY WHERE PROPOSAL_N=:proposal_no",
         { proposal_no: proposal_no }
       );
 
