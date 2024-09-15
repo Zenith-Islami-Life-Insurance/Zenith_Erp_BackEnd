@@ -145,17 +145,16 @@ exports.InsertProposal2DataController = async (req, res) => {
     res.status(500).json({ success: false, error: "Internal Server Error" });
   }
 };
-//newupdate 
-exports.updateTablesController = async (req, res) => {
-  const proposalNumber = req.params.PROPOSAL_N;
-  const { updateData1, updateData2 } = req.body;
-  console.log(updateData1, updateData2, proposalNumber)
 
+//newupdate 
+exports.updateMedicalInfo = async (req, res) => {
+  const proposalNumber = req.params.PROPOSAL_N;
+  console.log(req.body)
   try {
-    const success = await ProposalModule.updateTables(updateData1, updateData2, proposalNumber);
+    const success = await ProposalModule.updateMedicalInfo(req.body, proposalNumber);
 
     if (success) {
-      res.status(200).json({ message: 'Tables updated successfully' });
+      res.status(200).json({ message: 'Medical info updated successfully' });
     } else {
       res.status(404).json({ message: 'No rows updated' });
     }
@@ -420,8 +419,11 @@ exports.getProposalInformation = (req, res) => {
         edu: proposal[35],
         sPrem: proposal[36],
         suppliment_rate: proposal[37],
-        premiumWaiver: proposal[38]
-
+        premiumWaiver: proposal[38],
+        oePrem: proposal[39],
+        hPrem: proposal[40],
+        mdrPrem: proposal[41],
+        ipdPrem: proposal[42],
       };
     });
 
@@ -1460,6 +1462,25 @@ exports.UpdateProposalDummyController = async (req, res) => {
     console.error('Error in UpdateProposalDummyController:', err);
     res.status(500).json({ success: false, error: "Internal Server Error" });
   }
+};
+//get previous sumassured
+exports.getPreviousSumassurance = (req, res) => {
+  const { policyNo } = req.params;
+
+  ProposalModule.getPreviousSumassured(policyNo, (err, datas) => {
+    if (err) {
+      return res.status(500).json({ error: "Failed to get sumassurance" });
+    }
+
+    if (!datas || datas.length === 0) {
+      return res.status(404).json({ message: "No data found" });
+    }
+
+    // Assuming that datas[0][0] holds the sumassurance value
+    const sumAssurance = datas[0][0];
+
+    res.json({ sumAssurance: sumAssurance });
+  });
 };
 
 

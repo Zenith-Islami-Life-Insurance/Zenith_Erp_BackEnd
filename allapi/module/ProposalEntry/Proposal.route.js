@@ -26,14 +26,15 @@ router
   .get("/post-office/:code", ProposalController.getPostofficeList)
   .post("/proposal-entry", ProposalController.InsertProposalDataController)
   .post("/proposal-entry-address", ProposalController.InsertProposalAddressDataController)
-  .post("/proposal-entry-extend", ProposalController.InsertProposalExtendDataController)
+  .post("/proposal-extend", ProposalController.InsertProposalExtendDataController)
   .post("/proposal-entry-chain", ProposalController.InsertProposalChainDataController)
   .post("/nominee", ProposalController.InsertNomineeController)
   .post("/proposal-entry-chain-setup", ProposalController.InsertProposalChainSetupDataController)
   .post("/proposal-entry2", ProposalController.InsertProposal2DataController)
   .post('/sumAssured', ProposalController.getSumAssuredController)
   .patch("/proposal-update/:PROPOSAL_N", ProposalController.updatepurchaseByChno)
-  .put("/update_proposal/:PROPOSAL_N", ProposalController.updateTablesController)
+  // .put("/update_proposal/:PROPOSAL_N", ProposalController.updateTablesController)
+  .put("/medical-info/:PROPOSAL_N", ProposalController.updateMedicalInfo)
 
   .get("/proposal-number", ProposalController.getProposalNumber)
   .get(
@@ -146,6 +147,10 @@ router
   .put(
     "/update-proposal-dummy/:proposalNumber",
     ProposalController.UpdateProposalDummyController
-  );
+  )
+  .get(
+    "/previous-sumassurance/:policyNo",
+    ProposalController.getPreviousSumassurance
+  )
 
 module.exports = router;

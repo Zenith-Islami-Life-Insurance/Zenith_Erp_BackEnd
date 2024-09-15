@@ -447,81 +447,6 @@ const proposal = {
     }
   },
 
-
-
-  // getSumAssured: async (values) => {
-  //   let con;
-  //   try {
-  //     con = await oracledb.getConnection({
-  //       user: "MENU",
-  //       password: "mayin",
-  //       connectString: "192.168.3.11/system",
-  //     });
-
-  //     const results = [];
-
-  //     for (const value of values) {
-  //       const {
-  //         MPLAN,
-  //         MTERM,
-  //         MAGE,
-  //         MINSTMODE,
-  //         MSUMASS,
-  //         OPTION_M,
-  //         V_PENSION,
-  //         VDEATH_COVERAGE
-  //       } = value;
-
-  //       const result = await con.execute(
-  //         `SELECT CEIL(POLICY_MANAGEMENT.PREMIUM_VAL_NEW(
-  //             :MPLAN,
-  //             :MTERM,
-  //             :MAGE,
-  //             :MINSTMODE,
-  //             :MSUMASS,
-  //             :OPTION_M,
-  //             :V_PENSION,
-  //             :VDEATH_COVERAGE
-  //           )) AS AMOUNT FROM DUAL`,
-  //         {
-  //           MPLAN,
-  //           MTERM,
-  //           MAGE,
-  //           MINSTMODE,
-  //           MSUMASS,
-  //           OPTION_M,
-  //           V_PENSION,
-  //           VDEATH_COVERAGE
-  //         }
-  //       );
-
-  //       console.log("Query result:", result);
-
-  //       if (result.rows && result.rows.length > 0) {
-  //         const amount = result.rows[0][0]; // Correctly accessing the amount
-  //         console.log("Amount fetched:", amount);
-  //         results.push(amount);
-  //       } else {
-  //         console.log("No rows returned or result.rows is null.");
-  //         results.push(null);
-  //       }
-  //     }
-
-  //     return results;
-  //   } catch (err) {
-  //     console.error("Error during database operation:", err);
-  //     throw err;
-  //   } finally {
-  //     if (con) {
-  //       try {
-  //         await con.close();
-  //       } catch (err) {
-  //         console.error("Error closing the connection:", err);
-  //       }
-  //     }
-  //   }
-  // },
-
   //PROPOSAL-2 PAGE
   InsertProposal2Data: async (proposals) => {
     let con;
@@ -853,7 +778,7 @@ const proposal = {
       });
 
       const result = await con.execute(
-        "SELECT PROPOSAL_N,PROPOSAL_D,RISKDATE,TABLE_ID,TERM,SUM_INSURE,PREMIUM,SUMATRISK,PROPOSER,SALUTE,ADDRESS1,ADDRESS2,CITY,ZIP,MOBILE,DOB,AGE,AGE_P_CODE,FATHERHUSB,SEX,OCCUPATION,INSTMODE,TOTALINST,INSTNO,AGENT_ID,PD_CODE,MOTHERS_NAME,FATHERS_NAME,MARITAL_STATUS,N_ID_NUMBER,PLAN_DESCRIPTION, POL_ENTRY_STATUS,LAST_EDU_DOCUMENT,MARRIAGE_DATE,SPOUSE,LAST_EDUCATION,ACCPREM,ACCRATE,WAIVER_OF_PREMIUM FROM POLICY_MANAGEMENT.PROPOSAL_DUMMY WHERE PROPOSAL_N=:proposal_no",
+        "SELECT PROPOSAL_N,PROPOSAL_D,RISKDATE,TABLE_ID,TERM,SUM_INSURE,PREMIUM,SUMATRISK,PROPOSER,SALUTE,ADDRESS1,ADDRESS2,CITY,ZIP,MOBILE,DOB,AGE,AGE_P_CODE,FATHERHUSB,SEX,OCCUPATION,INSTMODE,TOTALINST,INSTNO,AGENT_ID,PD_CODE,MOTHERS_NAME,FATHERS_NAME,MARITAL_STATUS,N_ID_NUMBER,PLAN_DESCRIPTION, POL_ENTRY_STATUS,LAST_EDU_DOCUMENT,MARRIAGE_DATE,SPOUSE,LAST_EDUCATION,ACCPREM,ACCRATE,WAIVER_OF_PREMIUM,HOSPREMIUM,OEPREM,MAJOR_DIS_RIDER,IPD_RIDER FROM POLICY_MANAGEMENT.PROPOSAL_DUMMY WHERE PROPOSAL_N=:proposal_no",
         { proposal_no: proposal_no }
       );
 
@@ -2416,6 +2341,192 @@ const proposal = {
       }
     }
   },
+
+  //Get previous sumassured
+  getPreviousSumassured: async (policyNo, callback) => {
+    let con;
+    try {
+      con = await oracledb.getConnection({
+        user: "MENU",
+        password: "mayin",
+        connectString: "192.168.3.11/system",
+      });
+      const result = await con.execute(
+        `SELECT SUM_INSURE FROM POLICY_MANAGEMENT.PROPOSAL WHERE POLICY_NO=:policy_no`,
+        {
+          policy_no: policyNo,
+        }
+      );
+
+      console.log("SQL Result: ", result);
+
+      const data = result.rows || [];
+      callback(null, data);
+    } catch (err) {
+      console.error("SQL Execution Error: ", err);
+      callback(err, null);
+    } finally {
+      if (con) {
+        try {
+          await con.close();
+        } catch (err) {
+          console.error("Error closing connection: ", err);
+        }
+      }
+    }
+  },
+
+  //4th page update Medical Info 
+  // updateMedicalInfo: async (updateData1, proposalNumber) => {
+  //   let connection;
+
+  //   try {
+  //     console.log('Received updateData1:', updateData1);
+  //     console.log('Received proposalNumber:', proposalNumber);
+
+  //     if (!updateData1 || typeof updateData1 !== 'object' || Object.keys(updateData1).length === 0) {
+  //       throw new Error('No valid update data provided.');
+  //     }
+
+  //     connection = await oracledb.getConnection(config);
+
+  //     await connection.execute('SAVEPOINT sp1');
+
+  //     const filteredUpdateData1 = Object.fromEntries(
+  //       Object.entries(updateData1).filter(([key]) => key !== 'PROPOSAL_N')
+  //     );
+
+  //     if (Object.keys(filteredUpdateData1).length === 0) {
+  //       throw new Error('No valid fields provided to update.');
+  //     }
+
+  //     // Ensure column names are uppercase
+  //     const setClause1 = Object.keys(filteredUpdateData1)
+  //       .map((key) => `${key.toUpperCase()} = :${key}`)
+  //       .join(', ');
+
+  //     const sql1 = `UPDATE POLICY_MANAGEMENT.PROPOSAL_DUMMY SET ${setClause1} WHERE PROPOSAL_N = :proposal_number`;
+  //     const binds1 = { ...filteredUpdateData1, proposal_number: proposalNumber };
+
+  //     console.log('Executing SQL1:', sql1, 'with binds:', binds1);  // Debugging statement
+
+  //     await connection.execute(sql1, binds1);
+
+  //     await connection.commit();
+  //     return true;
+
+  //   } catch (err) {
+  //     if (connection) {
+  //       try {
+  //         await connection.execute('ROLLBACK');
+  //       } catch (rollbackErr) {
+  //         console.error('Error during rollback:', rollbackErr);
+  //       }
+  //     }
+  //     console.error('Error updating the tables:', err);
+  //     throw err;
+  //   } finally {
+  //     if (connection) {
+  //       try {
+  //         await connection.close();
+  //       } catch (err) {
+  //         console.error('Error closing the connection:', err);
+  //       }
+  //     }
+  //   }
+  // },
+  updateMedicalInfo: async (updateData, proposalNumber) => {
+    let connection;
+
+    try {
+      connection = await oracledb.getConnection(config);
+
+      // Decode the proposalNumber (in case it's URL encoded)
+      const decodedProposalNumber = decodeURIComponent(proposalNumber);
+
+      // Filter out empty/null fields from the updateData object
+      const filteredData = Object.fromEntries(
+        Object.entries(updateData).filter(
+          ([key, value]) => value !== null && value !== undefined && value !== ''
+        )
+      );
+
+      // Ensure date fields are in the correct format
+      ['LAST_DELIVERY_DT', 'EXP_DELIVERY_DT', 'INDATE', 'LAST_MENSTRUAL_DT', 'EXP_DELIVERY_DT', 'UNW_RESULT_DT'].forEach((dateField) => {
+        if (filteredData[dateField]) {
+          try {
+            const date = new Date(filteredData[dateField]);
+            if (isNaN(date.getTime())) throw new Error(`Invalid date: ${filteredData[dateField]}`);
+            // Format to MM/DD/YYYY
+            filteredData[dateField] = `${date.getMonth() + 1}/${date.getDate()}/${date.getFullYear()}`;
+          } catch (e) {
+            throw new Error(`Date formatting error for ${dateField}: ${e.message}`);
+          }
+        }
+      });
+
+      // Convert date fields to Oracle's TO_DATE format if necessary
+      const setClause = Object.keys(filteredData)
+        .map((key) => {
+          if (['LAST_DELIVERY_DT', 'EXP_DELIVERY_DT', 'INDATE', 'LAST_MENSTRUAL_DT', 'EXP_DELIVERY_DT', 'UNW_RESULT_DT'].includes(key)) {
+            return `${key} = TO_DATE(:${key}, 'MM/DD/YYYY')`;
+          } else {
+            return `${key} = :${key}`;
+          }
+        })
+        .join(', ');
+
+      // If there's nothing to update, return early
+      if (!setClause) {
+        console.log('No fields to update.');
+        return false;
+      }
+
+      // Use the dynamic proposalNumber
+      const sql = `UPDATE POLICY_MANAGEMENT.PROPOSAL_DUMMY_EXTEND SET ${setClause} WHERE PROPOSAL_N = :proposal_number`;
+
+      // Bind parameters for the query
+      const binds = { ...filteredData, proposal_number: decodedProposalNumber };
+
+      console.log('Executing SQL:', sql);  // Debugging statement
+      console.log('With binds:', binds);  // Debugging statement
+
+      // Execute the SQL statement
+      const result = await connection.execute(sql, binds);
+      console.log('Rows affected:', result.rowsAffected); // Log rows affected
+
+      // If no rows were affected, log a message
+      if (result.rowsAffected === 0) {
+        console.log('No rows were updated. Check if PROPOSAL_N exists.');
+      }
+
+      // Commit the transaction
+      await connection.commit();
+
+      return true;
+
+    } catch (err) {
+      if (connection) {
+        try {
+          // Rollback the transaction if there is an error
+          await connection.execute('ROLLBACK');
+        } catch (rollbackErr) {
+          console.error('Error during rollback:', rollbackErr);
+        }
+      }
+      console.error('Error updating the table:', err);
+      throw err;
+    } finally {
+      if (connection) {
+        try {
+          await connection.close();
+        } catch (err) {
+          console.error('Error closing the connection:', err);
+        }
+      }
+    }
+  }
+
 
 
 
