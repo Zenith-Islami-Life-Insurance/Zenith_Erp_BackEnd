@@ -146,7 +146,7 @@ exports.InsertProposal2DataController = async (req, res) => {
   }
 };
 
-//newupdate 
+//Update Medical Info
 exports.updateMedicalInfo = async (req, res) => {
   const proposalNumber = req.params.PROPOSAL_N;
   console.log(req.body)
@@ -692,6 +692,27 @@ exports.getAgee = (req, res) => {
   const dob = req.params.dob;
 
   ProposalModule.getAge(comm_date, dob, (err, age) => {
+    if (err) {
+      return res.status(500).json({ error: "Failed to get Date of birth" });
+    }
+
+    if (!age || age.length === 0) {
+      return res.status(404).json({ error: "Date of birth date not found" });
+    }
+
+    const birth_date = {
+      age: age[0],
+    };
+
+    res.json(birth_date);
+  });
+};
+//get age
+exports.getNomineeAgee = (req, res) => {
+  const comm_date = req.params.comm_date;
+  const dob = req.params.dob;
+
+  ProposalModule.getNomineeAge(comm_date, dob, (err, age) => {
     if (err) {
       return res.status(500).json({ error: "Failed to get Date of birth" });
     }
@@ -1482,6 +1503,58 @@ exports.getPreviousSumassurance = (req, res) => {
     res.json({ sumAssurance: sumAssurance });
   });
 };
+//Update previous policy no and amount
+exports.updatePreviousPolicyNo = async (req, res) => {
+  const proposalNumber = req.params.PROPOSAL_N;
+  console.log(req.body)
+  try {
+    const success = await ProposalModule.updatePreviousPolicyNo(req.body, proposalNumber);
+
+    if (success) {
+      res.status(200).json({ message: 'Policy info updated successfully' });
+    } else {
+      res.status(404).json({ message: 'No rows updated' });
+    }
+
+  } catch (err) {
+    res.status(500).json({ message: 'Internal server error', error: err.message });
+  }
+};
+exports.updateNominee = async (req, res) => {
+  const proposalNumber = req.params.PROPOSAL_N;
+  console.log(req.body)
+  try {
+    const success = await ProposalModule.updateNominee(req.body, proposalNumber);
+
+    if (success) {
+      res.status(200).json({ message: 'Nominee info updated successfully' });
+    } else {
+      res.status(404).json({ message: 'No rows updated' });
+    }
+
+  } catch (err) {
+    res.status(500).json({ message: 'Internal server error', error: err.message });
+  }
+};
+exports.getNominees = async (req, res) => {
+  try {
+    const { proposalNumber } = req.params;
+    console.log(`Fetching nominees for proposal number: ${proposalNumber}`);
+
+    const results = await ProposalModule.getNomineesByProposal(proposalNumber);
+    console.log(results);
+
+    res.status(200).json({
+      success: true,
+      message: "Nominees retrieved successfully",
+      data: results,
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ success: false, error: "Internal Server Error" });
+  }
+};
+
 
 
 

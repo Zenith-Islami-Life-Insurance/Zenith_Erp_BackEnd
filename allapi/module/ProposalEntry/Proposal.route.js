@@ -35,8 +35,11 @@ router
   .patch("/proposal-update/:PROPOSAL_N", ProposalController.updatepurchaseByChno)
   // .put("/update_proposal/:PROPOSAL_N", ProposalController.updateTablesController)
   .put("/medical-info/:PROPOSAL_N", ProposalController.updateMedicalInfo)
+  .put("/prev-policy-no/:PROPOSAL_N", ProposalController.updatePreviousPolicyNo)
+  .put("/nominee/:PROPOSAL_N", ProposalController.updateNominee)
 
   .get("/proposal-number", ProposalController.getProposalNumber)
+  .get("/nominee/:proposalNumber", ProposalController.getNominees)
   .get(
     "/comm_date/:com_date/:policy_type",
     ProposalController.getCommencementDate
@@ -48,6 +51,7 @@ router
 
   .get("/term-list/:plan_id/:age", ProposalController.getTermList)
   .get("/get-age/:comm_date/:dob", ProposalController.getAgee)
+  .get("/get-nomineeAge/:comm_date/:dob", ProposalController.getNomineeAgee)
   .get(
     "/total-installment/:pay_mode/:term",
     ProposalController.getTotalInstallments
