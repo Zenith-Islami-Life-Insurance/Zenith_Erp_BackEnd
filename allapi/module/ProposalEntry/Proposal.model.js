@@ -1269,6 +1269,37 @@ const proposal = {
       }
     }
   },
+  //NOMINEE BRANCH LIST
+  getNomineeBranchList: async (bank_code, callback) => {
+    let con;
+    try {
+      con = await oracledb.getConnection({
+        user: "MENU",
+        password: "mayin",
+        connectString: "192.168.3.11/system",
+      });
+
+      const result = await con.execute(
+        "SELECT DISTINCT BRANCHNAME,ROUTINGNO FROM POLICY_MANAGEMENT.BANK_BRANCH_VIEW WHERE BANKCODE=:bank_code",
+        { bank_code: bank_code }
+      );
+
+      // Assuming you want to return the first row
+      const data = result;
+      callback(null, data.rows);
+    } catch (err) {
+      console.error(err);
+      callback(err, null);
+    } finally {
+      if (con) {
+        try {
+          await con.close();
+        } catch (err) {
+          console.error(err);
+        }
+      }
+    }
+  },
 
   //ALL SUPPL. CLASS LIST
   getSupplClasslist: (occup_id, supp_code, callback) => {
@@ -2593,6 +2624,105 @@ const proposal = {
       }
     }
   },
+  insertNominees: async (proposals) => {
+    let con;
+
+    try {
+      con = await oracledb.getConnection({
+        user: "MENU",
+        password: "mayin",
+        connectString: "192.168.3.11/system",
+      });
+      const results = [];
+
+      for (const proposal of proposals) {
+        const {
+          PROPOSAL_N,
+          NAME,
+          AGE,
+          DOB,
+          RELATION,
+          PERCENTAGE,
+          ID_TYPE,
+          NN_ID_NUMBER,
+          N_MOBILE_NO,
+          ACC_NO,
+          ROUTINGNO,
+          GUARDIAN,
+          GAGE,
+          GRELATION,
+          GACCNO,
+          GROUTINGNO
+        } = proposal;
+
+        // Convert DOB from YYYYMMDD to MM/DD/YYYY
+        const formattedDOB = DOB ? `${DOB.substring(4, 6)}/${DOB.substring(6, 8)}/${DOB.substring(0, 4)}` : null;
+
+        // Log formatted DOB for debugging
+        console.log('Formatted DOB:', formattedDOB);
+
+        const result = await con.execute(
+          `INSERT INTO POLICY_MANAGEMENT.NOMINEE(
+                    PROPOSAL_N, NAME, AGE, DOB, RELATION, PERCENTAGE, ID_TYPE, NN_ID_NUMBER, 
+                    N_MOBILE_NO, ACC_NO, ROUTINGNO, GUARDIAN, GAGE, GRELATION, GACCNO, GROUTINGNO
+                ) 
+                VALUES(
+                    :PROPOSAL_N,
+                    :NAME,
+                    :AGE,
+                    TO_DATE(:DOB,'MM/DD/YYYY'),
+                    :RELATION,
+                    :PERCENTAGE,
+                    :ID_TYPE,
+                    :NN_ID_NUMBER,
+                    :N_MOBILE_NO,
+                    :ACC_NO,
+                    :ROUTINGNO,
+                    :GUARDIAN,
+                    :GAGE,
+                    :GRELATION,
+                    :GACCNO,
+                    :GROUTINGNO
+                )`,
+          {
+            PROPOSAL_N,
+            NAME,
+            AGE,
+            DOB: formattedDOB,
+            RELATION,
+            PERCENTAGE,
+            ID_TYPE,
+            NN_ID_NUMBER,
+            N_MOBILE_NO,
+            ACC_NO,
+            ROUTINGNO,
+            GUARDIAN,
+            GAGE,
+            GRELATION,
+            GACCNO,
+            GROUTINGNO
+          },
+          { autoCommit: true }
+        );
+
+        results.push(result.outBinds);
+      }
+
+      return results;
+    } catch (err) {
+      console.error(err);
+      throw err;
+    } finally {
+      if (con) {
+        try {
+          await con.close();
+        } catch (err) {
+          console.error(err);
+        }
+      }
+    }
+  },
+
   updateNominee: async (updateData, proposalNumber) => {
     let connection;
     try {
@@ -2723,10 +2853,6 @@ const proposal = {
       }
     }
   }
-
-
-
-
 
 };
 module.exports = proposal;

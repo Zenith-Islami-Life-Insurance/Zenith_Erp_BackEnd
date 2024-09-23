@@ -48,6 +48,8 @@ router
   .get("/prem-plan-list/:sum_assured", ProposalController.getPremPlanList)
   .get("/mode-list/:plan_id", ProposalController.getPayModeList)
   .get("/branch-list/:bank_code", ProposalController.getBranchList)
+  .get("/nominee-branch-list/:bank_code", ProposalController.getNomineeBranchList)
+  .post("/nominees", ProposalController.Insertnominees)
 
   .get("/term-list/:plan_id/:age", ProposalController.getTermList)
   .get("/get-age/:comm_date/:dob", ProposalController.getAgee)

@@ -838,12 +838,28 @@ exports.getBranchList = (req, res) => {
     res.json(formattedDeptHead);
   });
 };
+exports.getNomineeBranchList = (req, res) => {
+  const { bank_code } = req.params;
+  console.log('Bank Code', bank_code)
+  ProposalModule.getBankBranchList(bank_code, (err, branch) => {
+    if (err) {
+      return res.status(500).json({ error: "Failed to get term list" });
+    }
+
+    // Map the dept_head data to the desired format
+    const formattedDeptHead = branch.map((head) => ({
+      branch_name: head[0],
+      routing_no: head[1],
+    }));
+
+    res.json(formattedDeptHead);
+  });
+};
 
 //supplimentary_class list
 exports.supplimentClassList = (req, res) => {
   // Extract URL parameters
   const { occup_id, supp_code } = req.params;
-  console.log(req.params)
   // Validate input parameters
   if (!occup_id || !supp_code) {
     return res.status(400).json({ error: "occup_id and supp_code are required" });
@@ -1136,7 +1152,6 @@ exports.getWaiverPremium = (req, res) => {
 
 //get supplimentary rate
 exports.getSupplimentaryRate = (req, res) => {
-  console.log(req.params);
   const occup_code = req.params.occup_code;
   const supp_code = req.params.supp_code;
   const class_id = req.params.class_id;
@@ -1506,7 +1521,6 @@ exports.getPreviousSumassurance = (req, res) => {
 //Update previous policy no and amount
 exports.updatePreviousPolicyNo = async (req, res) => {
   const proposalNumber = req.params.PROPOSAL_N;
-  console.log(req.body)
   try {
     const success = await ProposalModule.updatePreviousPolicyNo(req.body, proposalNumber);
 
@@ -1520,9 +1534,31 @@ exports.updatePreviousPolicyNo = async (req, res) => {
     res.status(500).json({ message: 'Internal server error', error: err.message });
   }
 };
+
+//insert nominees 
+exports.Insertnominees = async (req, res) => {
+  try {
+    const proposals = req.body;
+    console.log(proposals);
+
+    // Call InsertProposalGuardian and pass proposals
+    const results = await ProposalModule.insertNominees(
+      Array.isArray(proposals) ? proposals : [proposals]
+    );
+    console.log(results);
+
+    res.status(200).json({
+      success: true,
+      message: "Nominee Entry Successfully",
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ success: false, error: "Internal Server Error" });
+  }
+};
+
 exports.updateNominee = async (req, res) => {
   const proposalNumber = req.params.PROPOSAL_N;
-  console.log(req.body)
   try {
     const success = await ProposalModule.updateNominee(req.body, proposalNumber);
 
