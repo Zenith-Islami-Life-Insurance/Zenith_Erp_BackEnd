@@ -36,7 +36,7 @@ router
   // .put("/update_proposal/:PROPOSAL_N", ProposalController.updateTablesController)
   .put("/medical-info/:PROPOSAL_N", ProposalController.updateMedicalInfo)
   .put("/prev-policy-no/:PROPOSAL_N", ProposalController.updatePreviousPolicyNo)
-  .put("/nominee/:PROPOSAL_N", ProposalController.updateNominee)
+  .put("/nominee/:slno", ProposalController.updateNominee)
 
   .get("/proposal-number", ProposalController.getProposalNumber)
   .get("/nominee/:proposalNumber", ProposalController.getNominees)

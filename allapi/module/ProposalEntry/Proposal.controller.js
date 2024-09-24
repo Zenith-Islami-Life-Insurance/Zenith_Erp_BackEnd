@@ -1539,13 +1539,11 @@ exports.updatePreviousPolicyNo = async (req, res) => {
 exports.Insertnominees = async (req, res) => {
   try {
     const proposals = req.body;
-    console.log(proposals);
 
     // Call InsertProposalGuardian and pass proposals
     const results = await ProposalModule.insertNominees(
       Array.isArray(proposals) ? proposals : [proposals]
     );
-    console.log(results);
 
     res.status(200).json({
       success: true,
@@ -1553,14 +1551,24 @@ exports.Insertnominees = async (req, res) => {
     });
   } catch (err) {
     console.error(err);
+
+    // Send an error message if the percentage exceeds 100%
+    if (err.message.includes("Percentage is already 100%")) {
+      return res.status(400).json({
+        success: false,
+        message: err.message,
+      });
+    }
+
     res.status(500).json({ success: false, error: "Internal Server Error" });
   }
 };
 
+
 exports.updateNominee = async (req, res) => {
-  const proposalNumber = req.params.PROPOSAL_N;
+  const slno = req.params.slno;
   try {
-    const success = await ProposalModule.updateNominee(req.body, proposalNumber);
+    const success = await ProposalModule.updateNominee(req.body, slno);
 
     if (success) {
       res.status(200).json({ message: 'Nominee info updated successfully' });

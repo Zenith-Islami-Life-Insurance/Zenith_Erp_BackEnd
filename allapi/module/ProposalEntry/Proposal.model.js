@@ -2652,45 +2652,60 @@ const proposal = {
           GAGE,
           GRELATION,
           GACCNO,
-          GROUTINGNO
+          GROUTINGNO,
         } = proposal;
 
+        // Log PERCENTAGE for debugging
+        console.log('PERCENTAGE from frontend (as string):', PERCENTAGE);
+
         // Convert DOB from YYYYMMDD to MM/DD/YYYY
-        const formattedDOB = DOB ? `${DOB.substring(4, 6)}/${DOB.substring(6, 8)}/${DOB.substring(0, 4)}` : null;
+        const formattedDOB = DOB
+          ? `${DOB.substring(4, 6)}/${DOB.substring(6, 8)}/${DOB.substring(0, 4)}`
+          : null;
 
-        // Log formatted DOB for debugging
-        console.log('Formatted DOB:', formattedDOB);
+        // Query to get total percentage for the given PROPOSAL_N
+        const percentageQuery = await con.execute(
+          `SELECT SUM(TO_NUMBER(PERCENTAGE)) AS TOTAL_PERCENTAGE
+           FROM POLICY_MANAGEMENT.NOMINEE
+           WHERE PROPOSAL_N = :PROPOSAL_N`,
+          { PROPOSAL_N }
+        );
 
+        // Get the total percentage from the result, default to 0 if null
+        const totalPercentage = percentageQuery.rows[0][0] || 0;
+
+        // Log total percentage for debugging
+        console.log('Total percentage in DB:', totalPercentage);
+
+        // Convert both totalPercentage and PERCENTAGE to numbers for calculations
+        const numericTotalPercentage = Number(totalPercentage);
+        const numericPercentage = parseFloat(PERCENTAGE); // Convert string to number
+
+        console.log('Sum of total and given percentage:', numericTotalPercentage + numericPercentage);
+
+        // Prevent insert if total percentage is already 100% or more
+        if (numericTotalPercentage + numericPercentage > 100) {
+          throw new Error(`Percentage is already 100% for proposal ${PROPOSAL_N}.`);
+        }
+
+        // Insert the nominee, storing PERCENTAGE as varchar
         const result = await con.execute(
           `INSERT INTO POLICY_MANAGEMENT.NOMINEE(
-                    PROPOSAL_N, NAME, AGE, DOB, RELATION, PERCENTAGE, ID_TYPE, NN_ID_NUMBER, 
-                    N_MOBILE_NO, ACC_NO, ROUTINGNO, GUARDIAN, GAGE, GRELATION, GACCNO, GROUTINGNO
-                ) 
-                VALUES(
-                    :PROPOSAL_N,
-                    :NAME,
-                    :AGE,
-                    TO_DATE(:DOB,'MM/DD/YYYY'),
-                    :RELATION,
-                    :PERCENTAGE,
-                    :ID_TYPE,
-                    :NN_ID_NUMBER,
-                    :N_MOBILE_NO,
-                    :ACC_NO,
-                    :ROUTINGNO,
-                    :GUARDIAN,
-                    :GAGE,
-                    :GRELATION,
-                    :GACCNO,
-                    :GROUTINGNO
-                )`,
+            PROPOSAL_N, NAME, AGE, DOB, RELATION, PERCENTAGE, ID_TYPE, NN_ID_NUMBER,
+            N_MOBILE_NO, ACC_NO, ROUTINGNO, GUARDIAN, GAGE, GRELATION, GACCNO, GROUTINGNO
+          ) 
+          VALUES(
+            :PROPOSAL_N, :NAME, :AGE, TO_DATE(:DOB, 'MM/DD/YYYY'), :RELATION, :PERCENTAGE,
+            :ID_TYPE, :NN_ID_NUMBER, :N_MOBILE_NO, :ACC_NO, :ROUTINGNO, :GUARDIAN, 
+            :GAGE, :GRELATION, :GACCNO, :GROUTINGNO
+          )`,
           {
             PROPOSAL_N,
             NAME,
             AGE,
             DOB: formattedDOB,
             RELATION,
-            PERCENTAGE,
+            PERCENTAGE: PERCENTAGE, // Save the original string value for PERCENTAGE
             ID_TYPE,
             NN_ID_NUMBER,
             N_MOBILE_NO,
@@ -2700,7 +2715,7 @@ const proposal = {
             GAGE,
             GRELATION,
             GACCNO,
-            GROUTINGNO
+            GROUTINGNO,
           },
           { autoCommit: true }
         );
@@ -2723,13 +2738,15 @@ const proposal = {
     }
   },
 
-  updateNominee: async (updateData, proposalNumber) => {
+
+  //update nominee
+  updateNominee: async (updateData, slno) => {
     let connection;
     try {
       connection = await oracledb.getConnection(config);
 
       // Decode the proposalNumber (in case it's URL encoded)
-      const decodedProposalNumber = decodeURIComponent(proposalNumber);
+      const decodedProposalNumber = decodeURIComponent(slno);
 
       // Filter out empty/null fields from the updateData object
       const filteredData = Object.fromEntries(
@@ -2770,10 +2787,10 @@ const proposal = {
       }
 
       // Use the dynamic proposalNumber
-      const sql = `UPDATE POLICY_MANAGEMENT.NOMINEE SET ${setClause} WHERE PROPOSAL_N = :proposal_number`;
+      const sql = `UPDATE POLICY_MANAGEMENT.NOMINEE SET ${setClause} WHERE SLNO = :slno`;
 
       // Bind parameters for the query
-      const binds = { ...filteredData, proposal_number: decodedProposalNumber };
+      const binds = { ...filteredData, slno: decodedProposalNumber };
 
       console.log('Executing SQL:', sql);  // Debugging statement
       console.log('With binds:', binds);  // Debugging statement
@@ -2784,7 +2801,7 @@ const proposal = {
 
       // If no rows were affected, log a message
       if (result.rowsAffected === 0) {
-        console.log('No rows were updated. Check if PROPOSAL_N exists.');
+        console.log('No rows were updated. Check if SLNO exists.');
       }
 
       // Commit the transaction
@@ -2825,12 +2842,11 @@ const proposal = {
       const result = await con.execute(
         `SELECT PROPOSAL_N, NAME, AGE, DOB, RELATION, PERCENTAGE, ID_TYPE, 
                 NN_ID_NUMBER, N_MOBILE_NO, ACC_NO, ROUTINGNO, 
-                GUARDIAN, GAGE, GRELATION, GACCNO, GROUTINGNO
+                GUARDIAN, GAGE, GRELATION, GACCNO, GROUTINGNO,SLNO
          FROM POLICY_MANAGEMENT.NOMINEE
          WHERE PROPOSAL_N = :proposalNumber`,
         { proposalNumber }
       );
-
       // Map the rows to key-value pairs
       const mappedResult = result.rows.map((row) => {
         return result.metaData.reduce((obj, col, index) => {
