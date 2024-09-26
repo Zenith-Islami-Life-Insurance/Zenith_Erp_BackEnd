@@ -150,6 +150,10 @@ router
     "/ipdRider/delete/:proposalNumber",
     ProposalController.deletePremInfoController
   )
+  .delete(
+    "/nominee/delete/:slno",
+    ProposalController.deleteNominee
+  )
   .put(
     "/update-proposal-dummy/:proposalNumber",
     ProposalController.UpdateProposalDummyController

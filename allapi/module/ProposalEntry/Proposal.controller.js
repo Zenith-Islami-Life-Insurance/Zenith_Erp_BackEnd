@@ -1564,22 +1564,6 @@ exports.Insertnominees = async (req, res) => {
   }
 };
 
-
-exports.updateNominee = async (req, res) => {
-  const slno = req.params.slno;
-  try {
-    const success = await ProposalModule.updateNominee(req.body, slno);
-
-    if (success) {
-      res.status(200).json({ message: 'Nominee info updated successfully' });
-    } else {
-      res.status(404).json({ message: 'No rows updated' });
-    }
-
-  } catch (err) {
-    res.status(500).json({ message: 'Internal server error', error: err.message });
-  }
-};
 exports.getNominees = async (req, res) => {
   try {
     const { proposalNumber } = req.params;
@@ -1598,12 +1582,65 @@ exports.getNominees = async (req, res) => {
     res.status(500).json({ success: false, error: "Internal Server Error" });
   }
 };
+exports.getBankList = async (req, res) => {
+  try {
+    const { routingNo } = req.params;
+    console.log(`Fetching Routing No: ${routingNo}`);
 
+    const results = await ProposalModule.getBanklist(routingNo);
+    console.log(results);
 
+    res.status(200).json({
+      success: true,
+      message: "Bank and branch retrieved successfully",
+      data: results,
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ success: false, error: "Internal Server Error" });
+  }
+};
 
+//delete nominee
+exports.deleteNominee = async (req, res) => {
+  try {
+    const { slno } = req.params;
 
+    const result = await ProposalModule.deleteNominee(slno);  // Correct function call
 
+    if (result.rowsAffected === 0) {
+      return res.status(404).json({ success: false, message: "No record found to delete" });
+    }
 
+    res.status(200).json({ success: true, message: "Nominee deleted successfully" });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ success: false, error: "Internal Server Error" });
+  }
+};
+
+//update Nominee by SLNO
+exports.updateNominee = async (req, res) => {
+  const slno = req.params.slno;
+  try {
+    const success = await ProposalModule.updateNominee(req.body, slno);
+
+    if (success) {
+      res.status(200).json({ message: 'Nominee info updated successfully' });
+    } else {
+      res.status(404).json({ message: 'No rows updated' });
+    }
+
+  } catch (err) {
+    if (err.message.includes("The total percentage")) {
+      return res.status(400).json({
+        success: false,
+        message: err.message,
+      });
+    }
+    res.status(500).json({ message: 'Internal server error', error: err.message });
+  }
+};
 
 
 

@@ -2737,99 +2737,6 @@ const proposal = {
       }
     }
   },
-
-
-  //update nominee
-  updateNominee: async (updateData, slno) => {
-    let connection;
-    try {
-      connection = await oracledb.getConnection(config);
-
-      // Decode the proposalNumber (in case it's URL encoded)
-      const decodedProposalNumber = decodeURIComponent(slno);
-
-      // Filter out empty/null fields from the updateData object
-      const filteredData = Object.fromEntries(
-        Object.entries(updateData).filter(
-          ([key, value]) => value !== null && value !== undefined && value !== ''
-        )
-      );
-
-      // Ensure date fields are in the correct format
-      ['DOB',].forEach((dateField) => {
-        if (filteredData[dateField]) {
-          try {
-            const date = new Date(filteredData[dateField]);
-            if (isNaN(date.getTime())) throw new Error(`Invalid date: ${filteredData[dateField]}`);
-            // Format to MM/DD/YYYY
-            filteredData[dateField] = `${date.getMonth() + 1}/${date.getDate()}/${date.getFullYear()}`;
-          } catch (e) {
-            throw new Error(`Date formatting error for ${dateField}: ${e.message}`);
-          }
-        }
-      });
-
-      // Convert date fields to Oracle's TO_DATE format if necessary
-      const setClause = Object.keys(filteredData)
-        .map((key) => {
-          if (['DOB'].includes(key)) {
-            return `${key} = TO_DATE(:${key}, 'MM/DD/YYYY')`;
-          } else {
-            return `${key} = :${key}`;
-          }
-        })
-        .join(', ');
-
-      // If there's nothing to update, return early
-      if (!setClause) {
-        console.log('No fields to update.');
-        return false;
-      }
-
-      // Use the dynamic proposalNumber
-      const sql = `UPDATE POLICY_MANAGEMENT.NOMINEE SET ${setClause} WHERE SLNO = :slno`;
-
-      // Bind parameters for the query
-      const binds = { ...filteredData, slno: decodedProposalNumber };
-
-      console.log('Executing SQL:', sql);  // Debugging statement
-      console.log('With binds:', binds);  // Debugging statement
-
-      // Execute the SQL statement
-      const result = await connection.execute(sql, binds);
-      console.log('Rows affected:', result.rowsAffected); // Log rows affected
-
-      // If no rows were affected, log a message
-      if (result.rowsAffected === 0) {
-        console.log('No rows were updated. Check if SLNO exists.');
-      }
-
-      // Commit the transaction
-      await connection.commit();
-
-      return true;
-
-    } catch (err) {
-      if (connection) {
-        try {
-          // Rollback the transaction if there is an error
-          await connection.execute('ROLLBACK');
-        } catch (rollbackErr) {
-          console.error('Error during rollback:', rollbackErr);
-        }
-      }
-      console.error('Error updating the table:', err);
-      throw err;
-    } finally {
-      if (connection) {
-        try {
-          await connection.close();
-        } catch (err) {
-          console.error('Error closing the connection:', err);
-        }
-      }
-    }
-  },
   getNomineesByProposal: async (proposalNumber) => {
     let con;
     try {
@@ -2868,7 +2775,201 @@ const proposal = {
         }
       }
     }
-  }
+  },
+  getBankList: async (proposalNumber) => {
+    let con;
+    try {
+      con = await oracledb.getConnection({
+        user: "MENU",
+        password: "mayin",
+        connectString: "192.168.3.11/system",
+      });
+
+      const result = await con.execute(
+        `SELECT PROPOSAL_N, NAME, AGE, DOB, RELATION, PERCENTAGE, ID_TYPE, 
+                NN_ID_NUMBER, N_MOBILE_NO, ACC_NO, ROUTINGNO, 
+                GUARDIAN, GAGE, GRELATION, GACCNO, GROUTINGNO,SLNO
+         FROM POLICY_MANAGEMENT.NOMINEE
+         WHERE PROPOSAL_N = :proposalNumber`,
+        { proposalNumber }
+      );
+      // Map the rows to key-value pairs
+      const mappedResult = result.rows.map((row) => {
+        return result.metaData.reduce((obj, col, index) => {
+          obj[col.name.toLowerCase()] = row[index];
+          return obj;
+        }, {});
+      });
+
+      return mappedResult;
+    } catch (err) {
+      console.error(err);
+      throw err;
+    } finally {
+      if (con) {
+        try {
+          await con.close();
+        } catch (err) {
+          console.error(err);
+        }
+      }
+    }
+  },
+  //delete nominee
+  deleteNominee: async (slno) => {
+    let con;
+    try {
+      con = await oracledb.getConnection({
+        user: "MENU",
+        password: "mayin",
+        connectString: "192.168.3.11/system",
+      });
+
+      const result = await con.execute(
+        `DELETE FROM POLICY_MANAGEMENT.NOMINEE WHERE SLNO = :slno`,
+        {
+          slno: slno,  // changed to match case
+        },
+        { autoCommit: true }
+      );
+
+      return result;
+    } catch (err) {
+      console.error(err);
+      throw err;
+    } finally {
+      if (con) {
+        try {
+          await con.close();
+        } catch (err) {
+          console.error(err);
+        }
+      }
+    }
+  },
+  //update nominee
+  updateNominee: async (updateData, slno) => {
+    let connection;
+    try {
+      connection = await oracledb.getConnection(config);
+      // Filter out empty/null fields from the updateData object
+      const filteredData = Object.fromEntries(
+        Object.entries(updateData).filter(
+          ([key, value]) => value !== null && value !== undefined && value !== ''
+        )
+      );
+
+      // Ensure date fields are in the correct format
+      ['DOB'].forEach((dateField) => {
+        if (filteredData[dateField]) {
+          try {
+            const date = new Date(filteredData[dateField]);
+            if (isNaN(date.getTime())) throw new Error(`Invalid date: ${filteredData[dateField]}`);
+            filteredData[dateField] = `${date.getMonth() + 1}/${date.getDate()}/${date.getFullYear()}`;
+          } catch (e) {
+            throw new Error(`Date formatting error for ${dateField}: ${e.message}`);
+          }
+        }
+      });
+      console.log('filterData', filteredData.PERCENTAGE)
+      // First, get the PROPOSAL_N based on SLNO
+      const proposalQuery = await connection.execute(
+        `SELECT PROPOSAL_N FROM POLICY_MANAGEMENT.NOMINEE WHERE SLNO = :slno`,
+        { slno: slno }
+      );
+
+      // Check if the proposal query returned a result
+      if (!proposalQuery.rows || proposalQuery.rows.length === 0) {
+        throw new Error(`No proposal found for SLNO ${slno}`);
+      }
+
+      // Extract the proposal number from the query result
+      const proposalNumber = proposalQuery.rows[0][0];
+      // Query to get the total percentage of all other nominees excluding the current nominee (slno)
+      const percentageQuery = await connection.execute(
+        `SELECT SUM(TO_NUMBER(PERCENTAGE)) AS TOTAL_PERCENTAGE
+         FROM POLICY_MANAGEMENT.NOMINEE
+         WHERE PROPOSAL_N = :proposalNumber
+         AND SLNO != :slno`,
+        { proposalNumber, slno }
+      );
+      ``
+      // Get the total percentage from the result, default to 0 if null
+      const totalPercentage = percentageQuery.rows[0][0] || 0;
+
+      console.log('Existing total percentage:', totalPercentage); // Log total percentage for debugging
+
+      // Convert both totalPercentage and the new percentage to numbers for calculations
+      const numericTotalPercentage = Number(totalPercentage);
+      const numericNewPercentage = parseFloat(filteredData.PERCENTAGE); // New percentage value to update
+
+      console.log('New percentage:', numericNewPercentage); // Log the new percentage for debugging
+
+      // Check if updating the current percentage would exceed 100%
+      if (numericTotalPercentage + numericNewPercentage > 100) {
+        throw new Error(
+          `The total percentage (${numericTotalPercentage + numericNewPercentage}%) exceeds 100%.`
+        );
+      }
+
+      // Convert date fields to Oracle's TO_DATE format if necessary
+      const setClause = Object.keys(filteredData)
+        .map((key) => {
+          if (['DOB'].includes(key)) {
+            return `${key} = TO_DATE(:${key}, 'MM/DD/YYYY')`;
+          } else {
+            return `${key} = :${key}`;
+          }
+        })
+        .join(', ');
+
+      // If there's nothing to update, return early
+      if (!setClause) {
+        console.log('No fields to update.');
+        return false;
+      }
+
+      // Use the dynamic slno
+      const sql = `UPDATE POLICY_MANAGEMENT.NOMINEE SET ${setClause} WHERE SLNO = :slno`;
+
+      // Bind parameters for the query
+      const binds = { ...filteredData, slno: slno };
+
+      // Debugging statement
+
+      // Execute the SQL statement
+      const result = await connection.execute(sql, binds);
+      console.log('Rows affected:', result.rowsAffected); // Log rows affected
+
+      if (result.rowsAffected === 0) {
+        console.log('No rows were updated. Check if SLNO exists.');
+      }
+
+      // Commit the transaction
+      await connection.commit();
+
+      return true;
+
+    } catch (err) {
+      console.error('Error occurred:', err); // Detailed logging of the error
+      if (connection) {
+        try {
+          await connection.execute('ROLLBACK');
+        } catch (rollbackErr) {
+          console.error('Error during rollback:', rollbackErr);
+        }
+      }
+      throw err;
+    } finally {
+      if (connection) {
+        try {
+          await connection.close();
+        } catch (err) {
+          console.error('Error closing the connection:', err);
+        }
+      }
+    }
+  },
 
 };
 module.exports = proposal;
