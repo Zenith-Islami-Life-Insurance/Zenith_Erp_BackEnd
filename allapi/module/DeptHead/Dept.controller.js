@@ -24,7 +24,7 @@ exports.getAllHead = (req, res) => {
 //id wise department head details
 exports.getDepartmentyById = (req, res) => {
   const catId = req.params.id;
-  // console.log(catId);
+  console.log('CATID', catId);
 
   Alldepthead.getById(catId, (err, dept_head) => {
     if (err) {
@@ -36,11 +36,11 @@ exports.getDepartmentyById = (req, res) => {
     }
 
     const formattedDeptHead = {
-      dept_head_id: dept_head[0],  
-      short_name: dept_head[1], 
+      dept_head_id: dept_head[0],
+      short_name: dept_head[1],
       employee_id: dept_head[2],
       full_name: dept_head[3],
-      department_name:dept_head[4],
+      department_name: dept_head[4],
     };
 
     res.json({ dept_head_details: formattedDeptHead });

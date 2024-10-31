@@ -424,6 +424,7 @@ exports.getProposalInformation = (req, res) => {
         hPrem: proposal[40],
         mdrPrem: proposal[41],
         ipdPrem: proposal[42],
+        religion: proposal[43]
       };
     });
 
