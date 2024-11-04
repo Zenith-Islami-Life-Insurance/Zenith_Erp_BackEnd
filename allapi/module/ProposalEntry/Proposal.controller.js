@@ -55,6 +55,30 @@ exports.InsertProposalExtendDataController = async (req, res) => {
     res.status(500).json({ success: false, error: "Internal Server Error" });
   }
 };
+//insert family History
+exports.InsertFamilyHistory = async (req, res) => {
+  try {
+    const proposals = req.body;
+    console.log(proposals);
+
+    // Call the model function
+    const results = await ProposalModule.InsertFamilyHistory(
+      Array.isArray(proposals) ? proposals : [proposals]
+    );
+
+    console.log(results); // Log the results to check inserted rows
+
+    res.status(200).json({
+      success: true,
+      message: "Family history created successfully",
+      data: results, // Include the results here
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ success: false, error: "Internal Server Error" });
+  }
+};
+
 exports.InsertProposalChainDataController = async (req, res) => {
   try {
     const proposals = req.body;
@@ -478,6 +502,22 @@ exports.getProposalNumber = (req, res) => {
     res.json(ProposalNumber);
   });
 };
+// get relId 
+exports.getRelId = (req, res) => {
+  const { proposal_no, rel_code } = req.params;
+
+  ProposalModule.getRelID(proposal_no, rel_code, (err, result) => {
+    if (err) {
+      return res.status(500).json({ error: "Error retrieving REL_ID" });
+    }
+    if (!result) {
+      return res.status(404).json({ error: "REL_ID not found" });
+    }
+
+    res.json({ relId: result.REL_ID });
+  });
+};
+
 
 //AGENT LIST
 exports.getAgentList = (req, res) => {

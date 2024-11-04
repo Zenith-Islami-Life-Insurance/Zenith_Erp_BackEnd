@@ -376,6 +376,78 @@ const proposal = {
       }
     }
   },
+  //insert family history 
+  InsertFamilyHistory: async (proposals) => {
+    let con;
+
+    try {
+      con = await oracledb.getConnection({
+        user: "MENU",
+        password: "mayin",
+        connectString: "192.168.3.11/system",
+      });
+      const results = [];
+
+      for (const proposal of proposals) {
+        console.log('Inserting Proposal:', proposal);
+
+        const {
+          PROPOSAL_N,
+          RELCODE,
+          REL_AGE,
+          REL_PHYSICAL,
+          DEATH_AGE,
+          DEATH_CAUSE,
+          DISEASE_TIME_MONTH,
+          DEATH_YEAR
+        } = proposal;
+
+        const result = await con.execute(
+          `INSERT INTO POLICY_MANAGEMENT.ONLINE_FAMILY_HISTORY(PROPOSAL_N, RELCODE, REL_AGE, REL_PHYSICAL, DEATH_AGE, DEATH_CAUSE, DISEASE_TIME_MONTH, DEATH_YEAR) 
+           VALUES(rtrim(ltrim(:PROPOSAL_N)), :RELCODE, :REL_AGE, :REL_PHYSICAL, :DEATH_AGE, :DEATH_CAUSE, :DISEASE_TIME_MONTH, :DEATH_YEAR)`,
+          {
+            PROPOSAL_N,
+            RELCODE,
+            REL_AGE,
+            REL_PHYSICAL,
+            DEATH_AGE,
+            DEATH_CAUSE,
+            DISEASE_TIME_MONTH,
+            DEATH_YEAR
+          },
+          { autoCommit: true }
+        );
+
+        // After insertion, retrieve the last inserted row
+        const insertedRow = {
+          PROPOSAL_N,
+          RELCODE,
+          REL_AGE,
+          REL_PHYSICAL,
+          DEATH_AGE,
+          DEATH_CAUSE,
+          DISEASE_TIME_MONTH,
+          DEATH_YEAR
+        };
+
+        results.push(insertedRow); // Push the inserted row into results
+      }
+
+      return results; // Return the array of inserted rows
+    } catch (err) {
+      console.error('Database error:', err);
+      throw err;
+    } finally {
+      if (con) {
+        try {
+          await con.close();
+        } catch (err) {
+          console.error('Error closing connection:', err);
+        }
+      }
+    }
+  },
+
 
   //update data
 
@@ -513,6 +585,39 @@ const proposal = {
       // Assuming you want to return the first row
       const data = result;
       callback(null, data.rows);
+    } catch (err) {
+      console.error(err);
+      callback(err, null);
+    } finally {
+      if (con) {
+        try {
+          await con.close();
+        } catch (err) {
+          console.error(err);
+        }
+      }
+    }
+  },
+
+  //get RelID
+  getRelID: async (proposal_no, rel_code, callback) => {
+    let con;
+    try {
+      con = await oracledb.getConnection({
+        user: "MENU",
+        password: "mayin",
+        connectString: "192.168.3.11/system",
+      });
+
+      const result = await con.execute(
+        `SELECT POLICY_MANAGEMENT.FAMILY_HISTORY_ID(:proposal_no, :rel_code) AS REL_ID FROM SYS.DUAL`,
+        { proposal_no, rel_code },
+        { outFormat: oracledb.OUT_FORMAT_OBJECT }
+      );
+
+      // Return the first row if it exists
+      const data = result.rows.length ? result.rows[0] : null;
+      callback(null, data);
     } catch (err) {
       console.error(err);
       callback(err, null);

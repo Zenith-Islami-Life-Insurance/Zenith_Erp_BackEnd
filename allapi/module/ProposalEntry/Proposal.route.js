@@ -18,6 +18,7 @@ router
   .get("/all-project", ProposalController.getAllprojectt)
   .get("/chain-list/:base_project/:base_code", ProposalController.getchainList)
   .get("/proposal-info", ProposalController.getProposalInformation)
+  .get("/rel-id/:proposal_n/:rel_code", ProposalController.getRelId)
 
   .get("/policy-info", ProposalController.getPolicyInformation)
   .get("/agent-list/:base_project", ProposalController.getAgentList)
@@ -27,6 +28,7 @@ router
   .post("/proposal-entry", ProposalController.InsertProposalDataController)
   .post("/proposal-entry-address", ProposalController.InsertProposalAddressDataController)
   .post("/proposal-extend", ProposalController.InsertProposalExtendDataController)
+  .post("/family-history", ProposalController.InsertFamilyHistory)
   .post("/proposal-entry-chain", ProposalController.InsertProposalChainDataController)
   .post("/nominee", ProposalController.InsertNomineeController)
   .post("/proposal-entry-chain-setup", ProposalController.InsertProposalChainSetupDataController)
