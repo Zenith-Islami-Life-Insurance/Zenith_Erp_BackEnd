@@ -1,11 +1,15 @@
-const connection = require("../../../utils/ConnectOracle");
-const oracledb = require("oracledb");
-oracledb.initOracleClient({ libDir: "C:\\instantclient_21_3" });
-const config = {
-  user: 'MENU',
-  password: 'mayin',
-  connectString: '192.168.3.11/system'  // replace with your actual connection string
-};
+// const connection = require("../../../utils/ConnectOracle");
+// const oracledb = require("oracledb");
+// oracledb.initOracleClient({ libDir: "C:\\instantclient_21_3" });
+
+const getDBConnection = require("../../../utils/ConnectOracle");
+
+// const config = {
+//   user: 'MENU',
+//   password: 'mayin',
+//   connectString: '192.168.3.11/system'  // replace with your actual connection string
+// };
+
 function convertDateToMMDDYYYY(dateString) {
   if (typeof dateString !== 'string' || dateString.length !== 8) {
     throw new Error('Invalid date format');
@@ -24,11 +28,7 @@ const proposal = {
     let con;
 
     try {
-      con = await oracledb.getConnection({
-        user: "MENU",
-        password: "mayin",
-        connectString: "192.168.3.11/system",
-      });
+      con = await getDBConnection();
       const results = [];
 
       for (const proposal of proposals) {
@@ -148,11 +148,7 @@ const proposal = {
     let con;
 
     try {
-      con = await oracledb.getConnection({
-        user: "MENU",
-        password: "mayin",
-        connectString: "192.168.3.11/system",
-      });
+      con = await getDBConnection();
       const results = [];
 
       for (const proposal of proposals) {
@@ -202,11 +198,7 @@ const proposal = {
     let con;
 
     try {
-      con = await oracledb.getConnection({
-        user: "MENU",
-        password: "mayin",
-        connectString: "192.168.3.11/system",
-      });
+      con = await getDBConnection();
       const results = [];
 
       for (const proposal of proposals) {
@@ -243,11 +235,7 @@ const proposal = {
   InsertProposalChain: async (proposals) => {
     let con;
     try {
-      con = await oracledb.getConnection({
-        user: "MENU",
-        password: "mayin",
-        connectString: "192.168.3.11/system",
-      });
+      con = await getDBConnection();
       const results = [];
 
       for (const proposal of proposals) {
@@ -289,11 +277,7 @@ const proposal = {
   InsertNominee: async (proposals) => {
     let con;
     try {
-      con = await oracledb.getConnection({
-        user: "MENU",
-        password: "mayin",
-        connectString: "192.168.3.11/system",
-      });
+      con = await getDBConnection();
       const results = [];
 
       for (const proposal of proposals) {
@@ -333,11 +317,7 @@ const proposal = {
   InsertProposalChainSetup: async (proposals) => {
     let con;
     try {
-      con = await oracledb.getConnection({
-        user: "MENU",
-        password: "mayin",
-        connectString: "192.168.3.11/system",
-      });
+      con = await getDBConnection();
       const results = [];
 
       for (const proposal of proposals) {
@@ -381,11 +361,7 @@ const proposal = {
     let con;
 
     try {
-      con = await oracledb.getConnection({
-        user: "MENU",
-        password: "mayin",
-        connectString: "192.168.3.11/system",
-      });
+      con = await getDBConnection();
       const results = [];
 
       for (const proposal of proposals) {
@@ -455,7 +431,7 @@ const proposal = {
     let connection;
 
     try {
-      connection = await oracledb.getConnection(config);
+      connection = await getDBConnection();
 
       // Start a transaction
       await connection.execute('SAVEPOINT sp1');
@@ -524,11 +500,7 @@ const proposal = {
     let con;
 
     try {
-      con = await oracledb.getConnection({
-        user: "MENU",
-        password: "mayin",
-        connectString: "192.168.3.11/system",
-      });
+      con = await getDBConnection();
 
       const results = [];
 
@@ -571,11 +543,7 @@ const proposal = {
   getProposalnNumber: async (OFFICE_CODE, callback) => {
     let con;
     try {
-      con = await oracledb.getConnection({
-        user: "MENU",
-        password: "mayin",
-        connectString: "192.168.3.11/system",
-      });
+      con = await getDBConnection();
 
       const result = await con.execute(
         "SELECT POLICY_MANAGEMENT.M_PROPOSAL_NO(:OFFICE_CODE) FROM SYS.DUAL",
@@ -603,11 +571,7 @@ const proposal = {
   getRelID: async (proposal_no, rel_code, callback) => {
     let con;
     try {
-      con = await oracledb.getConnection({
-        user: "MENU",
-        password: "mayin",
-        connectString: "192.168.3.11/system",
-      });
+      con = await getDBConnection();
 
       const result = await con.execute(
         `SELECT POLICY_MANAGEMENT.FAMILY_HISTORY_ID(:proposal_no, :rel_code) AS REL_ID FROM SYS.DUAL`,
@@ -637,11 +601,7 @@ const proposal = {
     async function type() {
       let con;
       try {
-        con = await oracledb.getConnection({
-          user: "MENU",
-          password: "mayin",
-          connectString: "192.168.3.11/system",
-        });
+        con = await getDBConnection();
         const data = await con.execute(
           "SELECT DISTINCT * FROM  POLICY_MANAGEMENT.ONLINE_AGEPROOF"
         );
@@ -659,11 +619,7 @@ const proposal = {
     async function education() {
       let con;
       try {
-        con = await oracledb.getConnection({
-          user: "MENU",
-          password: "mayin",
-          connectString: "192.168.3.11/system",
-        });
+        con = await getDBConnection();
         const data = await con.execute(
           "SELECT EDNAME,EDCODE FROM POLICY_MANAGEMENT.ONLINE_EDUCATION"
         );
@@ -679,11 +635,7 @@ const proposal = {
     async function religion() {
       let con;
       try {
-        con = await oracledb.getConnection({
-          user: "MENU",
-          password: "mayin",
-          connectString: "192.168.3.11/system",
-        });
+        con = await getDBConnection();
         const data = await con.execute(
           "SELECT RELIGIONS_NAME,RELIGIONS_ID FROM POLICY_MANAGEMENT.ONLINE_RELIGIONS"
         );
@@ -700,11 +652,7 @@ const proposal = {
     async function occupation() {
       let con;
       try {
-        con = await oracledb.getConnection({
-          user: "MENU",
-          password: "mayin",
-          connectString: "192.168.3.11/system",
-        });
+        con = await getDBConnection();
         const data = await con.execute(
           "SELECT OCCUPNAME,OCCUP FROM POLICY_MANAGEMENT.ONLINE_OCCUPATION ORDER BY OCCUPNAME"
         );
@@ -720,11 +668,7 @@ const proposal = {
     async function COUNTRY() {
       let con;
       try {
-        con = await oracledb.getConnection({
-          user: "MENU",
-          password: "mayin",
-          connectString: "192.168.3.11/system",
-        });
+        con = await getDBConnection();
         const data = await con.execute(
           "SELECT DISTINCT  C_NAME,C_CODE FROM POLICY_MANAGEMENT.COUNTRY"
         );
@@ -740,11 +684,7 @@ const proposal = {
     async function allbranch() {
       let con;
       try {
-        con = await oracledb.getConnection({
-          user: "MENU",
-          password: "mayin",
-          connectString: "192.168.3.11/system",
-        });
+        con = await getDBConnection();
         const data = await con.execute(
           "SELECT NAME,BRANCH_ID FROM POLICY_MANAGEMENT.BRANCH WHERE OFFICE_STATUS='A' ORDER BY NAME"
         );
@@ -761,11 +701,7 @@ const proposal = {
     async function allgender() {
       let con;
       try {
-        con = await oracledb.getConnection({
-          user: "MENU",
-          password: "mayin",
-          connectString: "192.168.3.11/system",
-        });
+        con = await getDBConnection();
         const data = await con.execute(
           "SELECT GENDER_NAME,GENDER_ID FROM POLICY_MANAGEMENT.ONLINE_GENDER"
         );
@@ -782,11 +718,7 @@ const proposal = {
     async function allLocallity() {
       let con;
       try {
-        con = await oracledb.getConnection({
-          user: "MENU",
-          password: "mayin",
-          connectString: "192.168.3.11/system",
-        });
+        con = await getDBConnection();
         const data = await con.execute(
           "SELECT LOCALITY_TYPE,LOCALITY_ID FROM POLICY_MANAGEMENT.ONLINE_LOCALITY"
         );
@@ -803,11 +735,7 @@ const proposal = {
     async function allprojects() {
       let con;
       try {
-        con = await oracledb.getConnection({
-          user: "MENU",
-          password: "mayin",
-          connectString: "192.168.3.11/system",
-        });
+        con = await getDBConnection();
         const data = await con.execute(
           "SELECT 'PROJECT-'||CODE NAME, CODE FROM POLICY_MANAGEMENT.PD WHERE STAT='A' ORDER BY CODE"
         );
@@ -824,11 +752,7 @@ const proposal = {
     async function allDivision() {
       let con;
       try {
-        con = await oracledb.getConnection({
-          user: "MENU",
-          password: "mayin",
-          connectString: "192.168.3.11/system",
-        });
+        con = await getDBConnection();
         const data = await con.execute(
           "SELECT DNAME DIVNAME,DCODE FROM POLICY_MANAGEMENT.DISTRICT ORDER BY DIVNAME"
         );
@@ -844,11 +768,7 @@ const proposal = {
   getchainListbyprojectid: async (base_project, base_code, callback) => {
     let con;
     try {
-      con = await oracledb.getConnection({
-        user: "MENU",
-        password: "mayin",
-        connectString: "192.168.3.11/system",
-      });
+      con = await getDBConnection();
 
       const result = await con.execute(
         "SELECT CHAIN_NAME,CHAIN_CODE,CHAIN_DESIGNATION,CHAIN_POSITION FROM (SELECT DISTINCT BASE_NAME CHAIN_NAME,BASE_CODE CHAIN_CODE,'FA' CHAIN_DESIGNATION,1 CHAIN_POSITION FROM POLICY_MANAGEMENT.ALL_SENIOR_INFO_DETAILS  WHERE BASE_PROJECT=:base_project AND  BASE_CODE=:base_code AND BASE_DSGN='01' UNION ALL SELECT CHAIN_NAME,CHAIN_CODE,CHAIN_DESIGNATION,CHAIN_POSITION FROM POLICY_MANAGEMENT.ALL_SENIOR_INFO_DETAILS WHERE BASE_PROJECT=:base_project AND  BASE_CODE=:base_code AND BASE_DSGN='01') ORDER BY CHAIN_POSITION",
@@ -876,11 +796,7 @@ const proposal = {
   getProposalInfo: async (proposal_no, callback) => {
     let con;
     try {
-      con = await oracledb.getConnection({
-        user: "MENU",
-        password: "mayin",
-        connectString: "192.168.3.11/system",
-      });
+      con = await getDBConnection();
 
       const result = await con.execute(
         "SELECT PROPOSAL_N,PROPOSAL_D,RISKDATE,TABLE_ID,TERM,SUM_INSURE,PREMIUM,SUMATRISK,PROPOSER,SALUTE,ADDRESS1,ADDRESS2,CITY,ZIP,MOBILE,DOB,AGE,AGE_P_CODE,FATHERHUSB,SEX,OCCUPATION,INSTMODE,TOTALINST,INSTNO,AGENT_ID,PD_CODE,MOTHERS_NAME,FATHERS_NAME,MARITAL_STATUS,N_ID_NUMBER,PLAN_DESCRIPTION, POL_ENTRY_STATUS,LAST_EDU_DOCUMENT,MARRIAGE_DATE,SPOUSE,LAST_EDUCATION,ACCPREM,ACCRATE,WAIVER_OF_PREMIUM,HOSPREMIUM,OEPREM,MAJOR_DIS_RIDER,IPD_RIDER,RELIGION,BRANCH_ID FROM POLICY_MANAGEMENT.PROPOSAL_DUMMY WHERE PROPOSAL_N=:proposal_no",
@@ -908,11 +824,7 @@ const proposal = {
   getPolicyInfo: async (policy_no, callback) => {
     let con;
     try {
-      con = await oracledb.getConnection({
-        user: "MENU",
-        password: "mayin",
-        connectString: "192.168.3.11/system",
-      });
+      con = await getDBConnection();
 
       const result = await con.execute(
         "SELECT POLICY_NO, PROPOSER,RISKDATE,SUM_INSURE FROM POLICY_MANAGEMENT.PROPOSAL WHERE POLICY_NO=:policy_no",
@@ -940,11 +852,7 @@ const proposal = {
   getAgentList: async (base_project, callback) => {
     let con;
     try {
-      con = await oracledb.getConnection({
-        user: "MENU",
-        password: "mayin",
-        connectString: "192.168.3.11/system",
-      });
+      con = await getDBConnection();
 
       const result = await con.execute(
         "SELECT DISTINCT BASE_NAME,BASE_CODE FROM POLICY_MANAGEMENT.ALL_SENIOR_INFO_DETAILS WHERE BASE_PROJECT=:base_project AND BASE_DSGN='01'",
@@ -972,11 +880,7 @@ const proposal = {
   getThanaList: async (div_code, callback) => {
     let con;
     try {
-      con = await oracledb.getConnection({
-        user: "MENU",
-        password: "mayin",
-        connectString: "192.168.3.11/system",
-      });
+      con = await getDBConnection();
 
       const result = await con.execute(
         "SELECT THANA,TCODE FROM POLICY_MANAGEMENT.THANA WHERE DCODE=:div_code",
@@ -1004,11 +908,7 @@ const proposal = {
   getPostList: async (code, callback) => {
     let con;
     try {
-      con = await oracledb.getConnection({
-        user: "MENU",
-        password: "mayin",
-        connectString: "192.168.3.11/system",
-      });
+      con = await getDBConnection();
 
       const result = await con.execute(
         "SELECT POST_OFFICE_NM,POST_CODE FROM POLICY_MANAGEMENT.POST_OFFICE WHERE THANA_CODE=:code",
@@ -1036,11 +936,7 @@ const proposal = {
   getCommencementDate: async (com_date, policy_type, callback) => {
     let con;
     try {
-      con = await oracledb.getConnection({
-        user: "MENU",
-        password: "mayin",
-        connectString: "192.168.3.11/system",
-      });
+      con = await getDBConnection();
 
       const result = await con.execute(
         "SELECT POLICY_MANAGEMENT.API_COMM_DATE (TO_DATE(:com_date, 'YYYYMMDD'),:policy_type) FROM SYS.DUAL",
@@ -1071,11 +967,7 @@ const proposal = {
   getAllPlan: async (age, callback) => {
     let con;
     try {
-      con = await oracledb.getConnection({
-        user: "MENU",
-        password: "mayin",
-        connectString: "192.168.3.11/system",
-      });
+      con = await getDBConnection();
 
       const result = await con.execute(
         "SELECT PLAN_ID, PLAN_DESCRIPTION,SUPPLEMENTARY,EXTRA_LOADING,MAJOR_DIEASES_RIDER,INPATIENT_RIDER,PREMIUM_WAIVER, CALCULATION_TYPE, MIN_AGE, MAX_AGE, MIN_TERM, MAX_TERM, MIN_SUMINS, MAX_SUMINS FROM POLICY_MANAGEMENT.PLANS WHERE :AGE BETWEEN MIN_AGE AND MAX_AGE AND IDRA_SENT = 'Y'",
@@ -1103,11 +995,7 @@ const proposal = {
   getPaymodeList: async (plan_id, callback) => {
     let con;
     try {
-      con = await oracledb.getConnection({
-        user: "MENU",
-        password: "mayin",
-        connectString: "192.168.3.11/system",
-      });
+      con = await getDBConnection();
 
       const result = await con.execute(
         "SELECT MODE_CODE, MODE_NAME FROM POLICY_MANAGEMENT.PAYMENT_MODE_PLANWISE A, POLICY_MANAGEMENT.PAY_MODE B WHERE A.MODE_CODE=B.MODE_ID AND A.TABLE_ID=:plan_id",
@@ -1135,11 +1023,7 @@ const proposal = {
   getTermList: async (plan_id, age, callback) => {
     let con;
     try {
-      con = await oracledb.getConnection({
-        user: "MENU",
-        password: "mayin",
-        connectString: "192.168.3.11/system",
-      });
+      con = await getDBConnection();
 
       const result = await con.execute(
         "SELECT DISTINCT TERM from POLICY_MANAGEMENT.POLICY01 WHERE TABLE_ID=:plan_id AND AGE<=:age ORDER BY TERM",
@@ -1170,11 +1054,7 @@ const proposal = {
   getAge: async (comm_date, dob, callback) => {
     let con;
     try {
-      con = await oracledb.getConnection({
-        user: "MENU",
-        password: "mayin",
-        connectString: "192.168.3.11/system",
-      });
+      con = await getDBConnection();
 
       const result = await con.execute(
         "SELECT POLICY_MANAGEMENT.AGE( TO_DATE(:comm_date,'YYYYMMDD'),TO_DATE(:dob,'YYYYMMDD') ) FROM sys.DUAL",
@@ -1204,11 +1084,7 @@ const proposal = {
   getNomineeAge: async (comm_date, dob, callback) => {
     let con;
     try {
-      con = await oracledb.getConnection({
-        user: "MENU",
-        password: "mayin",
-        connectString: "192.168.3.11/system",
-      });
+      con = await getDBConnection();
 
       const result = await con.execute(
         "SELECT POLICY_MANAGEMENT.AGE( TO_DATE(:comm_date,'YYYYMMDD'),TO_DATE(:dob,'YYYYMMDD') ) FROM sys.DUAL",
@@ -1238,11 +1114,7 @@ const proposal = {
   getTotalInstallment: async (pay_mode, term, callback) => {
     let con;
     try {
-      con = await oracledb.getConnection({
-        user: "MENU",
-        password: "mayin",
-        connectString: "192.168.3.11/system",
-      });
+      con = await getDBConnection();
 
       const result = await con.execute(
         "SELECT POLICY_MANAGEMENT.TOTAL_INSTALMENT(:pay_mode,:term) FROM SYS.DUAL",
@@ -1273,11 +1145,7 @@ const proposal = {
   getRateCalcultion: async (age, term, table_id, cAge, callback) => {
     let con;
     try {
-      con = await oracledb.getConnection({
-        user: "MENU",
-        password: "mayin",
-        connectString: "192.168.3.11/system",
-      });
+      con = await getDBConnection();
 
       const result = await con.execute(
         "SELECT RATE, FACTOR FROM POLICY_MANAGEMENT.POLICY01 WHERE AGE=:age AND TERM=:term AND TABLE_ID=:table_id AND C_AGE=:cAge",
@@ -1306,11 +1174,7 @@ const proposal = {
     async function premium() {
       let con;
       try {
-        con = await oracledb.getConnection({
-          user: "MENU",
-          password: "mayin",
-          connectString: "192.168.3.11/system",
-        });
+        con = await getDBConnection();
         const data = await con.execute(
           "SELECT DISTINCT PREMIUM,PREMIUM/100 PREM_AMT FROM POLICY_MANAGEMENT.MONTHLY_PREMIUM"
         );
@@ -1327,11 +1191,7 @@ const proposal = {
     async function bank() {
       let con;
       try {
-        con = await oracledb.getConnection({
-          user: "MENU",
-          password: "mayin",
-          connectString: "192.168.3.11/system",
-        });
+        con = await getDBConnection();
         const data = await con.execute(
           "SELECT DISTINCT BANKCODE,BANKNAME FROM POLICY_MANAGEMENT.BANK_BRANCH_VIEW"
         );
@@ -1347,11 +1207,7 @@ const proposal = {
   getBankBranchList: async (bank_code, callback) => {
     let con;
     try {
-      con = await oracledb.getConnection({
-        user: "MENU",
-        password: "mayin",
-        connectString: "192.168.3.11/system",
-      });
+      con = await getDBConnection();
 
       const result = await con.execute(
         "SELECT DISTINCT BRANCHNAME,ROUTINGNO FROM POLICY_MANAGEMENT.BANK_BRANCH_VIEW WHERE BANKCODE=:bank_code",
@@ -1378,11 +1234,7 @@ const proposal = {
   getNomineeBranchList: async (bank_code, callback) => {
     let con;
     try {
-      con = await oracledb.getConnection({
-        user: "MENU",
-        password: "mayin",
-        connectString: "192.168.3.11/system",
-      });
+      con = await getDBConnection();
 
       const result = await con.execute(
         "SELECT DISTINCT BRANCHNAME,ROUTINGNO FROM POLICY_MANAGEMENT.BANK_BRANCH_VIEW WHERE BANKCODE=:bank_code",
@@ -1411,11 +1263,7 @@ const proposal = {
     async function SupplClass() {
       let con;
       try {
-        con = await oracledb.getConnection({
-          user: "MENU",
-          password: "mayin",
-          connectString: "192.168.3.11/system",
-        });
+        con = await getDBConnection();
         const data = await con.execute(
           `SELECT CLASS_ID, CLASS_NAME 
            FROM (
@@ -1453,11 +1301,7 @@ const proposal = {
     async function SuppliClass() {
       let con;
       try {
-        con = await oracledb.getConnection({
-          user: "MENU",
-          password: "mayin",
-          connectString: "192.168.3.11/system",
-        });
+        con = await getDBConnection();
         const data = await con.execute(
           "SELECT SUPP_CODE,SUPP_NAME FROM POLICY_MANAGEMENT.SUPPLEMENTARY_TYPE WHERE STATUS='A'"
         );
@@ -1481,11 +1325,7 @@ const proposal = {
   ) => {
     let con;
     try {
-      con = await oracledb.getConnection({
-        user: "MENU",
-        password: "mayin",
-        connectString: "192.168.3.11/system",
-      });
+      con = await getDBConnection();
 
       const result = await con.execute(
         "SELECT POLICY_MANAGEMENT.SUPPL_VAL(:table_id,:occup_id,:supp_type,:supp_class,:sum_assured,:pay_mode) FROM SYS.DUAL",
@@ -1530,11 +1370,7 @@ const proposal = {
   ) => {
     let con;
     try {
-      con = await oracledb.getConnection({
-        user: "MENU",
-        password: "mayin",
-        connectString: "192.168.3.11/system",
-      });
+      con = await getDBConnection();
 
       const result = await con.execute(
         "SELECT CEIL(POLICY_MANAGEMENT.PREMIUM_VAL_NEW(:tableId, :termId, :userAge, :instMode, :sumAss, :userOption, :pensionValue, :deathCoverage)) AS BASIC_PREMIUM FROM DUAL",
@@ -1582,11 +1418,7 @@ const proposal = {
   ) => {
     let con;
     try {
-      con = await oracledb.getConnection({
-        user: "MENU",
-        password: "mayin",
-        connectString: "192.168.3.11/system",
-      });
+      con = await getDBConnection();
 
       const result = await con.execute(
         "SELECT (POLICY_MANAGEMENT.SUMINSURE_VALUE_NEW(:table_id,:term_id,:age,:monthlyPremium,:sum_insured)) FROM DUAL",
@@ -1626,11 +1458,7 @@ const proposal = {
   ) => {
     let con;
     try {
-      con = await oracledb.getConnection({
-        user: "MENU",
-        password: "mayin",
-        connectString: "192.168.3.11/system",
-      });
+      con = await getDBConnection();
 
       const result = await con.execute(
         "SELECT POLICY_MANAGEMENT.RISK_VALUE(:table_id,:sum_ass,:premium,:factor,:instmode) FROM SYS.DUAL",
@@ -1664,11 +1492,7 @@ const proposal = {
   getPremPlanList: async (sum_assured, callback) => {
     let con;
     try {
-      con = await oracledb.getConnection({
-        user: "MENU",
-        password: "mayin",
-        connectString: "192.168.3.11/system",
-      });
+      con = await getDBConnection();
 
       const result = await con.execute(
         "SELECT PLAN_NO,PLAN_NAME FROM (SELECT DISTINCT PLAN_NO,PLAN_NAME FROM (select PLAN_NAME,YLY_MAX_BENEFIT,PLAN_NO from policy_management.IPD_PLAN WHERE PLAN_NO=1 UNION ALL select PLAN_NAME,YLY_MAX_BENEFIT,PLAN_NO from policy_management.IPD_PLAN WHERE NVL(YLY_MAX_BENEFIT,0)<=NVL(:sum_assured,0))) ORDER BY PLAN_NO",
@@ -1696,11 +1520,7 @@ const proposal = {
   getEndAtdate: async (RISKDATE, callback) => {
     let con;
     try {
-      con = await oracledb.getConnection({
-        user: "MENU",
-        password: "mayin",
-        connectString: "192.168.3.11/system",
-      });
+      con = await getDBConnection();
 
       const result = await con.execute(
         "SELECT ADD_MONTHS(TO_DATE(:RISKDATE, 'YYYYMMDD'), 12)  FROM  SYS.DUAL",
@@ -1735,11 +1555,7 @@ const proposal = {
   ) => {
     let con;
     try {
-      con = await oracledb.getConnection({
-        user: "MENU",
-        password: "mayin",
-        connectString: "192.168.3.11/system",
-      });
+      con = await getDBConnection();
 
       const result = await con.execute(
         "SELECT POLICY_MANAGEMENT.IPD_PREM_CALC_NEW(:plan_no,TO_DATE(:dob, 'YYYYMMDD'),TO_DATE(:risk_rate, 'YYYYMMDD'),:instmode,:table_id) FROM SYS.DUAL",
@@ -1782,11 +1598,7 @@ const proposal = {
   ) => {
     let con;
     try {
-      con = await oracledb.getConnection({
-        user: "MENU",
-        password: "mayin",
-        connectString: "192.168.3.11/system",
-      });
+      con = await getDBConnection();
 
       const result = await con.execute(
         "SELECT POLICY_MANAGEMENT.CRITICAL_ILLNESS_CALC_NEW(:table_id,:term_id,TO_DATE(:dob, 'YYYYMMDD'),TO_DATE(:risk_date, 'YYYYMMDD'),:sum_insured,:instmode,'PREM') AS PREM,POLICY_MANAGEMENT.CRITICAL_ILLNESS_CALC_NEW(:table_id,:term_id,TO_DATE(:dob, 'YYYYMMDD'),TO_DATE(:risk_date,'YYYYMMDD'),:sum_insured,:instmode,'RATE') AS RATE FROM SYS.DUAL",
@@ -1821,11 +1633,7 @@ const proposal = {
   getWaiverPrem: async (age, plan, basic_prem, callback) => {
     let con;
     try {
-      con = await oracledb.getConnection({
-        user: "MENU",
-        password: "mayin",
-        connectString: "192.168.3.11/system",
-      });
+      con = await getDBConnection();
 
       const result = await con.execute(
         "SELECT POLICY_MANAGEMENT.PREMIUM_WAIVER(:age,:plan,:basic_prem) FROM SYS.DUAL",
@@ -1857,11 +1665,7 @@ const proposal = {
   getSuppRate: async (occup_code, supp_code, class_id, callback) => {
     let con;
     try {
-      con = await oracledb.getConnection({
-        user: "MENU",
-        password: "mayin",
-        connectString: "192.168.3.11/system",
-      });
+      con = await getDBConnection();
 
       const result = await con.execute(
         "select RATE from POLICY_MANAGEMENT.SUPPLEMENTARY_RATE where OCCUP=:occup_code and SUPP_CODE=:supp_code and CLASS_ID=:class_id",
@@ -1903,11 +1707,7 @@ const proposal = {
   ) => {
     let con;
     try {
-      con = await oracledb.getConnection({
-        user: "MENU",
-        password: "mayin",
-        connectString: "192.168.3.11/system",
-      });
+      con = await getDBConnection();
 
       const result = await con.execute(
         "SELECT POLICY_MANAGEMENT.LOADING_VAL_NEW(:table_id,:occup_code,:gender,:sum_assured,:last_education,:last_education_document,:instmode) FROM SYS.DUAL",
@@ -1953,11 +1753,8 @@ const proposal = {
   ) => {
     let con;
     try {
-      con = await oracledb.getConnection({
-        user: "MENU",
-        password: "mayin",
-        connectString: "192.168.3.11/system",
-      });
+      con = await getDBConnection();
+
       // "SELECT POLICY_MANAGEMENT.HOSPITAL_EXTRA_NEW (:table_id,:occup_code,:gender,:sum_assured,:last_education,:last_education_document,NVL(:instmode,'1')) FROM SYS.DUAL",
       const result = await con.execute(
         "SELECT POLICY_MANAGEMENT.LOADING_VAL_NEW(:table_id,:occup_code,:gender,:sum_assured,:last_education,:last_education_document,:instmode) FROM SYS.DUAL",
@@ -1993,11 +1790,7 @@ const proposal = {
   getOccupationRate: async (occup, callback) => {
     let con;
     try {
-      con = await oracledb.getConnection({
-        user: "MENU",
-        password: "mayin",
-        connectString: "192.168.3.11/system",
-      });
+      con = await getDBConnection();
 
       const result = await con.execute(
         "SELECT NVL(OE_FE_RATE, 0) FROM POLICY_MANAGEMENT.ONLINE_OCCUPATION WHERE OCCUP = :occup",
@@ -2032,11 +1825,7 @@ const proposal = {
   ) => {
     let con;
     try {
-      con = await oracledb.getConnection({
-        user: "MENU",
-        password: "mayin",
-        connectString: "192.168.3.11/system",
-      });
+      con = await getDBConnection();
       const result = await con.execute(
         "SELECT POLICY_MANAGEMENT.PREMIUM_WAIVER(:age,:table_id,:premium) FROM SYS.DUAL",
         {
@@ -2074,11 +1863,7 @@ const proposal = {
   ) => {
     let con;
     try {
-      con = await oracledb.getConnection({
-        user: "MENU",
-        password: "mayin",
-        connectString: "192.168.3.11/system",
-      });
+      con = await getDBConnection();
 
       const result = await con.execute(
         `SELECT POLICY_MANAGEMENT.CRITICAL_ILLNESS_CALC_NEW(
@@ -2131,11 +1916,7 @@ const proposal = {
   ) => {
     let con;
     try {
-      con = await oracledb.getConnection({
-        user: "MENU",
-        password: "mayin",
-        connectString: "192.168.3.11/system",
-      });
+      con = await getDBConnection();
 
       const result = await con.execute(
         `SELECT POLICY_MANAGEMENT.CRITICAL_ILLNESS_CALC_NEW(
@@ -2179,11 +1960,7 @@ const proposal = {
   getPlanDetails: async (riskAdate, txtSumInsured, callback) => {
     let con;
     try {
-      con = await oracledb.getConnection({
-        user: "MENU",
-        password: "mayin",
-        connectString: "192.168.3.11/system",
-      });
+      con = await getDBConnection();
       const result = await con.execute(
         `SELECT DISTINCT PLAN_NAME, PLAN_NO, YLY_MAX_BENEFIT, 
                TO_DATE(:RISKADATE, 'YYYYMMDD') AS START_FROM, 
@@ -2226,11 +2003,7 @@ const proposal = {
   getMedicalStatus: async (proposalNo, callback) => {
     let con;
     try {
-      con = await oracledb.getConnection({
-        user: "MENU",
-        password: "mayin",
-        connectString: "192.168.3.11/system",
-      });
+      con = await getDBConnection();
       const result = await con.execute(
         `SELECT POLICY_MANAGEMENT.MEDICAL_STATUS(:proposalNo) AS XX FROM SYS.DUAL`,
         {
@@ -2258,11 +2031,7 @@ const proposal = {
   getMaturityDate: async (com_date, term, callback) => {
     let con;
     try {
-      con = await oracledb.getConnection({
-        user: "MENU",
-        password: "mayin",
-        connectString: "192.168.3.11/system",
-      });
+      con = await getDBConnection();
 
       // Updated query to properly call a function or procedure and handle parameters
       const result = await con.execute(
@@ -2298,11 +2067,7 @@ const proposal = {
   getOption: async (table_id, callback) => {
     let con;
     try {
-      con = await oracledb.getConnection({
-        user: "MENU",
-        password: "mayin",
-        connectString: "192.168.3.11/system",
-      });
+      con = await getDBConnection();
 
       const result = await con.execute(
         `SELECT DISTINCT OPTION_N,
@@ -2338,11 +2103,7 @@ const proposal = {
   insertPremInfo: async (premInfo) => {
     let con;
     try {
-      con = await oracledb.getConnection({
-        user: "MENU",
-        password: "mayin",
-        connectString: "192.168.3.11/system",
-      });
+      con = await getDBConnection();
 
       // Create a transaction to insert all records
       const insertPromises = premInfo.map(async (info) => {
@@ -2389,11 +2150,7 @@ const proposal = {
   deletePremInfo: async (proposalNumber) => {
     let con;
     try {
-      con = await oracledb.getConnection({
-        user: "MENU",
-        password: "mayin",
-        connectString: "192.168.3.11/system",
-      });
+      con = await getDBConnection();
 
       const result = await con.execute(
         `DELETE FROM policy_management.IPD_PREM_INFO WHERE REFNO = :PROPOSAL_N`,
@@ -2422,7 +2179,7 @@ const proposal = {
     let connection;
 
     try {
-      connection = await oracledb.getConnection(config);
+      connection = await getDBConnection();
 
       // Decode the proposalNumber (in case it's URL encoded)
       const decodedProposalNumber = decodeURIComponent(proposalNumber);
@@ -2516,11 +2273,7 @@ const proposal = {
   getPreviousSumassured: async (policyNo, callback) => {
     let con;
     try {
-      con = await oracledb.getConnection({
-        user: "MENU",
-        password: "mayin",
-        connectString: "192.168.3.11/system",
-      });
+      con = await getDBConnection();
       const result = await con.execute(
         `SELECT SUM_INSURE FROM POLICY_MANAGEMENT.PROPOSAL WHERE POLICY_NO=:policy_no`,
         {
@@ -2551,7 +2304,7 @@ const proposal = {
     let connection;
 
     try {
-      connection = await oracledb.getConnection(config);
+      connection = await getDBConnection();
 
       // Decode the proposalNumber (in case it's URL encoded)
       const decodedProposalNumber = decodeURIComponent(proposalNumber);
@@ -2642,7 +2395,7 @@ const proposal = {
     let connection;
 
     try {
-      connection = await oracledb.getConnection(config);
+      connection = await getDBConnection();
 
       // Decode the proposalNumber (in case it's URL encoded)
       const decodedProposalNumber = decodeURIComponent(proposalNumber);
@@ -2733,11 +2486,7 @@ const proposal = {
     let con;
 
     try {
-      con = await oracledb.getConnection({
-        user: "MENU",
-        password: "mayin",
-        connectString: "192.168.3.11/system",
-      });
+      con = await getDBConnection();
       const results = [];
 
       for (const proposal of proposals) {
@@ -2845,11 +2594,7 @@ const proposal = {
   getNomineesByProposal: async (proposalNumber) => {
     let con;
     try {
-      con = await oracledb.getConnection({
-        user: "MENU",
-        password: "mayin",
-        connectString: "192.168.3.11/system",
-      });
+      con = await getDBConnection();
 
       const result = await con.execute(
         `SELECT PROPOSAL_N, NAME, AGE, DOB, RELATION, PERCENTAGE, ID_TYPE, 
@@ -2884,11 +2629,7 @@ const proposal = {
   getBankList: async (proposalNumber) => {
     let con;
     try {
-      con = await oracledb.getConnection({
-        user: "MENU",
-        password: "mayin",
-        connectString: "192.168.3.11/system",
-      });
+      con = await getDBConnection();
 
       const result = await con.execute(
         `SELECT PROPOSAL_N, NAME, AGE, DOB, RELATION, PERCENTAGE, ID_TYPE, 
@@ -2924,11 +2665,7 @@ const proposal = {
   deleteNominee: async (slno) => {
     let con;
     try {
-      con = await oracledb.getConnection({
-        user: "MENU",
-        password: "mayin",
-        connectString: "192.168.3.11/system",
-      });
+      con = await getDBConnection();
 
       const result = await con.execute(
         `DELETE FROM POLICY_MANAGEMENT.NOMINEE WHERE SLNO = :slno`,
@@ -2956,7 +2693,7 @@ const proposal = {
   updateNominee: async (updateData, slno) => {
     let connection;
     try {
-      connection = await oracledb.getConnection(config);
+      connection = await getDBConnection();
       // Filter out empty/null fields from the updateData object
       const filteredData = Object.fromEntries(
         Object.entries(updateData).filter(

@@ -10,6 +10,7 @@ router
 
 
 .get("/dept-permission-list", ModuleController.deptPermissionlist)
+.get("/modules/:personalId", ModuleController.getModuleByPersonalId)
 .get("/module-list/:id", ModuleController.getModuleById)
 .get("/dept-list-mIdwise/:id", ModuleController.getdeptListByMid)
 .get("/total-user", ModuleController.totalPermittedUser)

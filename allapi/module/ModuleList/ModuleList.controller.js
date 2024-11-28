@@ -35,6 +35,32 @@ exports.getAllmodules = (req, res) => {
     });
   };
 
+  //personalid wise sub module list
+  exports.getModuleByPersonalId = (req, res) => {
+    const personalId = req.params.personalId;
+    console.log(personalId);
+    
+    AllModule.getmoduleListbyId(personalId, (err, module_list) => {
+      if (err) {
+        return res.status(500).json({ error: "Failed to get module data" });
+      }
+  
+      if (!module_list || module_list.length === 0) {
+        return res.status(404).json({ error: "Module not found" });
+      }
+  
+      // Assuming each inner array represents a module
+      const formattedModuleList = module_list.map(moduleArray => {
+        return {
+          Module_id: moduleArray[0],
+          Module_name: moduleArray[1]
+        };
+      });
+  
+      res.json({ sub_module_list: formattedModuleList });
+    });
+  };
+
   //id wise sub module list
   exports.getModuleById = (req, res) => {
     const catId = req.params.id;

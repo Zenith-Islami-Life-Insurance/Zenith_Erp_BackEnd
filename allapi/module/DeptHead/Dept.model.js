@@ -1,17 +1,15 @@
-const connection = require("../../../utils/ConnectOracle");
-const oracledb = require('oracledb');
-oracledb.initOracleClient({libDir: 'C:\\instantclient_21_3'});
+// const connection = require("../../../utils/ConnectOracle");
+// const oracledb = require('oracledb');
+// oracledb.initOracleClient({libDir: 'C:\\instantclient_21_3'});
+
+const getDBConnection = require("../../../utils/ConnectOracle");
 
 const Alldepthead = {
 
   getById: async (catId, callback) => {
     let con;
     try {
-      con = await oracledb.getConnection({
-        user: "MENU",
-        password: "mayin",
-        connectString: "192.168.3.11/system"
-      });
+      con = await getDBConnection();
   
       const result = await con.execute(
         "SELECT DISTINCT PERSONALID, USERNAME, EMP_CODE,NAME,DEP_NAME FROM HRD.DEPARMENT_ACCESS WHERE DEPART_HEAD='Y' AND PERSONALID = :catId",
@@ -38,11 +36,7 @@ const Alldepthead = {
   getDeptHeadlist: async (callback) => {
     let con;
     try {
-      con = await oracledb.getConnection({
-        user: "MENU",
-        password: "mayin",
-        connectString: "192.168.3.11/system"
-      });
+      con = await getDBConnection();
   
       const result = await con.execute("SELECT DISTINCT PERSONALID,NAME,ROLE_ID,ROLE_NAME,DEPARTMENT,DEP_NAME FROM USER_ROLE_DEPT WHERE ROLE_ID IN('0','2')");
   
@@ -68,11 +62,7 @@ const Alldepthead = {
       async function total_dept_head(){
         let con;
         try{
-            con = await oracledb.getConnection({
-                user            : "MENU",
-                password        : "mayin",
-                connectString   : "192.168.3.11/system"
-            });
+          con = await getDBConnection();
             const data = await con.execute("SELECT COUNT(*) FROM USER_ROLE_DEPT WHERE ROLE_NAME='DEPT-HEAD'");
             callback(null, data.rows);
         }catch(err){
