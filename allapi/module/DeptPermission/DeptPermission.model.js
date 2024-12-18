@@ -97,15 +97,14 @@ const DeptPermission = {
   //PERMISSION FROM DEPT-HEAD TO DESK
 
   //PERMISSION LIST BY DEPARTMENT_HEAD
-  getpermissionList: async (dept_head_id, dept_id, callback) => {
+  getpermissionList: async (dept_id, callback) => {
     let con;
     try {
       con = await getDBConnection();
 
       const result = await con.execute(
-        "SELECT MODULE_ID,MODULE_NAME,P_READ,P_CREATE,P_EDIT,P_DELETE,NAME,DEP_NAME,PERMITTED_BY,ACCESS_BY FROM MODULE_DETAILS_ALL WHERE PERMITTED_BY=:dept_head_id AND DEPARTMENT=:dept_id ORDER BY MODULE_ID",
+        "SELECT MODULE_ID,MODULE_NAME,P_READ,P_CREATE,P_EDIT,P_DELETE,NAME,DEP_NAME,PERMITTED_BY,ACCESS_BY,DENSE_RANK() OVER (ORDER BY MODULE_ID) AS SL FROM MODULE_DETAILS_ALL WHERE DEPARTMENT=:dept_id ORDER BY MODULE_ID",
         {
-          dept_head_id: dept_head_id,
           dept_id: dept_id,
         }
       );

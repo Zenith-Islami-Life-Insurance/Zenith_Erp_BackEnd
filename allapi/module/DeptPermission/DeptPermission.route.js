@@ -5,7 +5,7 @@ const DeptController = require("./DeptPermission.controller");
 router
 .post('/create-permission', DeptController.createDATA)
 .post('/create-permission-new', DeptController.createNEWDATA)
-.get('/permission-list-depthead/:dept_head_id/:dept_id', DeptController.getallpermissionList)
+.get('/permission-list-depthead/:dept_id', DeptController.getallpermissionList)
 .get('/permission-list-desk/:module_id/:dept_id', DeptController.getdeskuserprevList)
 
 

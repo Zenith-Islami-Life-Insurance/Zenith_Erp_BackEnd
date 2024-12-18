@@ -53,11 +53,12 @@ exports.getAllmodules = (req, res) => {
       const formattedModuleList = module_list.map(moduleArray => {
         return {
           Module_id: moduleArray[0],
-          Module_name: moduleArray[1]
+          Module_name: moduleArray[1],
+          Module_link: moduleArray[2]
         };
       });
   
-      res.json({ sub_module_list: formattedModuleList });
+      res.json({ module_list: formattedModuleList });
     });
   };
 

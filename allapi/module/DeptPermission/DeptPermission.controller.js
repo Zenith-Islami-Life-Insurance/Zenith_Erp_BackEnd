@@ -45,11 +45,9 @@ exports.createNEWDATA = async (req, res) => {
 
 //dept_head_id wise list
 exports.getallpermissionList = (req, res) => {
-  const dept_head_id = req.params.dept_head_id;
   const dept_id = req.params.dept_id;
 
   DeptPermission.getpermissionList(
-    dept_head_id,
     dept_id,
     (err, module_list) => {
       if (err) {
@@ -71,6 +69,7 @@ exports.getallpermissionList = (req, res) => {
         dep_name: head[7],
         permitted_by: head[8],
         access_by: head[9],
+        sl: head[10],
       }));
 
       res.json({ permission_list: formattedDeptHead });

@@ -100,6 +100,34 @@ const AllModule = {
     allmodule();
   },
 
+  //SUB MODULE LIST === TANVIR ===
+  // getmoduleListId: async (catId, callback) => {
+  //   let con;
+  //   try {
+  //     con = await getDBConnection();
+
+  //     const result = await con.execute(
+  //       "SELECT * FROM MENU.MODULES WHERE GROUP_ID=:catId",
+  //       [catId]
+  //     );
+
+  //     // Assuming you want to return the first row
+  //     const data = result;
+  //     callback(null, data.rows);
+  //   } catch (err) {
+  //     console.error(err);
+  //     callback(err, null);
+  //   } finally {
+  //     if (con) {
+  //       try {
+  //         await con.close();
+  //       } catch (err) {
+  //         console.error(err);
+  //       }
+  //     }
+  //   }
+  // },
+
   //SUB MODULE LIST
   getmoduleListId: async (catId, callback) => {
     let con;
@@ -107,7 +135,7 @@ const AllModule = {
       con = await getDBConnection();
 
       const result = await con.execute(
-        "SELECT * FROM MENU.MODULES WHERE GROUP_ID=:catId",
+        "SELECT * FROM MENU.MODULES WHERE MODULE_ID=:catId",
         [catId]
       );
 
@@ -135,7 +163,7 @@ const AllModule = {
       con = await getDBConnection();
 
       const result = await con.execute(
-        "SELECT ACCESS_USER FROM MENU.MODULE_ACCESS WHERE MODULE_ID=:moduleId",
+        "SELECT DISTINCT ACCESS_BY FROM MENU.MODULE_PRIVILAGE WHERE MODULE_ID=:moduleId",
         [moduleId]
       );
 
@@ -163,7 +191,7 @@ const AllModule = {
       con = await getDBConnection();
 
       const result = await con.execute(
-        "SELECT MODULE_NAME,MODULE_ID FROM MODULE_DETAILS_ALL WHERE ACCESS_BY=:personalId",
+        "SELECT MODULE_ID,MODULE_NAME,MODULE_VIEW_NAME FROM MODULE_DETAILS_ALL WHERE ACCESS_BY=:personalId",
         [personalId]
       );
 
